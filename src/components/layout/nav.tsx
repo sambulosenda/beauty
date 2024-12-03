@@ -16,6 +16,9 @@ export function Navbar() {
           <Link href="/bookings">
             <Button variant="ghost">My Bookings</Button>
           </Link>
+          <Link href="/profile">
+            <Button variant="ghost">Profile</Button>
+          </Link>
           <Link href="/login">
             <Button variant="ghost">Login</Button>
           </Link>
