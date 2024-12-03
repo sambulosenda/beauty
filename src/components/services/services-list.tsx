@@ -38,7 +38,7 @@ export function ServicesList() {
             <p className="text-gray-600">{service.description}</p>
             <div className="mt-4">
               <p className="font-semibold">£{service.price}</p>
-              <p className="text-sm text-gray-500">{service.duration} minutes</p>
+              <p className="texsat-sm text-gray-500">{service.duration} minutes</p>
             </div>
           </CardContent>
           <CardFooter>
