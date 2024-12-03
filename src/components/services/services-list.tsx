@@ -1,9 +1,5 @@
-"use client"
-
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { BookingModal } from "./booking-modal"
-import { useState } from "react"
 
 // This is temporary mock data - we'll replace it with real data later
 const services = [
@@ -29,47 +25,27 @@ const services = [
     description: "Rejuvenating facial with premium products"
   }
 ]
+
 export function ServicesList() {
-    const [selectedService, setSelectedService] = useState<typeof services[0] | null>(null)
-    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
-  
-    return (
-      <>
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
-            <Card key={service.id}>
-              <CardHeader>
-                <CardTitle>{service.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">{service.description}</p>
-                <div className="mt-4">
-                  <p className="font-semibold">£{service.price}</p>
-                  <p className="text-sm text-gray-500">{service.duration} minutes</p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  className="w-full"
-                  onClick={() => {
-                    setSelectedService(service)
-                    setIsBookingModalOpen(true)
-                  }}
-                >
-                  Book Now
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-  
-        {selectedService && (
-          <BookingModal 
-            service={selectedService}
-            open={isBookingModalOpen}
-            onOpenChange={setIsBookingModalOpen}
-          />
-        )}
-      </>
-    )
-  }
+  return (
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {services.map((service) => (
+        <Card key={service.id}>
+          <CardHeader>
+            <CardTitle>{service.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-600">{service.description}</p>
+            <div className="mt-4">
+              <p className="font-semibold">£{service.price}</p>
+              <p className="text-sm text-gray-500">{service.duration} minutes</p>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full">Book Now</Button>
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  )
+}

@@ -2,9 +2,6 @@
 
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -15,8 +12,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { useAuth } from "./auth-context"
-import { toast } from "sonner"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -29,8 +26,6 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const { signIn } = useAuth()
-  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,17 +36,12 @@ export function LoginForm() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setIsLoading(true)
-      await signIn(values.email, values.password)
-      toast.success("Logged in successfully!")
-      router.push("/dashboard")
-    } catch (error) {
-      toast.error("Invalid email or password")
-      console.error(error)
-    } finally {
-      setIsLoading(false)
-    }
+    setIsLoading(true)
+    
+    // TODO: Implement actual login logic
+    console.log(values)
+    
+    setIsLoading(false)
   }
 
   return (
@@ -64,11 +54,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="name@example.com" 
-                  {...field} 
-                  disabled={isLoading}
-                />
+                <Input placeholder="name@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -81,18 +67,14 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input 
-                  type="password" 
-                  {...field} 
-                  disabled={isLoading}
-                />
+                <Input type="password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Signing in..." : "Sign in"}
+          {isLoading ? "Loading..." : "Login"}
         </Button>
       </form>
     </Form>
