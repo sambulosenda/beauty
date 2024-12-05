@@ -1,37 +1,29 @@
+// components/layout/navbar.tsx
 import Link from "next/link"
-import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs"
-import { Button } from "@/components/ui/button"
+import { NavbarAuth } from "./navbar-auth"
 
-export function Navbar() {
+export default function Navbar() {
   return (
-    <header className="border-b">
-      <div className="container flex h-16 items-center px-4">
-        <Link href="/" className="font-bold">
-          Beauty Booking
-        </Link>
-        
-        <nav className="ml-auto flex items-center gap-4">
-          <Link href="/services">
-            <Button variant="ghost">Services</Button>
-          </Link>
+    <nav className="bg-white shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link href="/" className="text-2xl font-semibold text-gray-800">
+              BeautyBook
+            </Link>
+          </div>
           
-          <SignedIn>
-            <Link href="/dashboard">
-              <Button variant="ghost">Dashboard</Button>
+          <div className="flex items-center space-x-4">
+            <Link 
+              href="/services" 
+              className="text-gray-600 hover:text-gray-900"
+            >
+              Services
             </Link>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
-          
-          <SignedOut>
-            <Link href="/sign-in">
-              <Button variant="ghost">Sign in</Button>
-            </Link>
-            <Link href="/sign-up">
-              <Button>Sign up</Button>
-            </Link>
-          </SignedOut>
-        </nav>
+            <NavbarAuth />
+          </div>
+        </div>
       </div>
-    </header>
+    </nav>
   )
 }

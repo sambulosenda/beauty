@@ -8,6 +8,20 @@
       "when": 1733317235490,
       "tag": "0000_curvy_gambit",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1733340893418,
+      "tag": "0001_nappy_rattler",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1733343115624,
+      "tag": "0002_striped_falcon",
+      "breakpoints": true
     }
   ]
 }
