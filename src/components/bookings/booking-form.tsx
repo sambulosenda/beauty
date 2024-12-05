@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
-import DatePicker from 'react-datepicker'
-import { addDays, setHours, setMinutes } from 'date-fns'
-import "react-datepicker/dist/react-datepicker.css"
+import { addDays, setHours, setMinutes, format, parse, isSameDay } from 'date-fns'
 import { formatCurrency } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Calendar } from '@/components/ui/calendar'
 import { checkAvailability } from '@/lib/availability'
+import { CalendarIcon, Clock, CheckCircle2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface BookingFormProps {
   service: {
@@ -23,43 +25,56 @@ interface BookingFormProps {
 
 export default function BookingForm({ service }: BookingFormProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [selectedTime, setSelectedTime] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { user, isSignedIn } = useUser()
   const router = useRouter()
 
-  const handleDateChange = async (date: Date | null) => {
+  const handleDateChange = (date: Date | null) => {
     setError(null)
     setSelectedDate(date)
+    setSelectedTime(null)
+  }
 
-    if (date) {
+  const handleTimeChange = async (time: string) => {
+    setError(null)
+    setSelectedTime(time)
+
+    if (selectedDate) {
+      const [hours, minutes] = time.split(':').map(Number)
+      const dateTime = setMinutes(setHours(selectedDate, hours), minutes)
+
       try {
         const availability = await checkAvailability(
           service.providerId,
-          date,
+          dateTime,
           service.duration
         )
 
         if (!availability.available) {
           setError(availability.reason || 'Time slot not available')
-          setSelectedDate(null)
+          setSelectedTime(null)
         }
       } catch (error) {
         setError('Error checking availability')
-        setSelectedDate(null)
+        setSelectedTime(null)
       }
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate || !isSignedIn) {
+    if (!selectedDate || !selectedTime || !isSignedIn) {
       setError('Please select a date and time')
       return
     }
 
     setIsLoading(true)
     try {
+      const [hours, minutes] = selectedTime.split(':').map(Number)
+      const dateTime = setMinutes(setHours(selectedDate, hours), minutes)
+
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: {
@@ -68,7 +83,7 @@ export default function BookingForm({ service }: BookingFormProps) {
         body: JSON.stringify({
           serviceId: service.id,
           providerId: service.providerId,
-          date: selectedDate,
+          date: dateTime,
         }),
       })
 
@@ -88,67 +103,157 @@ export default function BookingForm({ service }: BookingFormProps) {
     }
   }
 
-  const minTime = setHours(setMinutes(new Date(), 0), 9)
-  const maxTime = setHours(setMinutes(new Date(), 0), 17)
+  const generateTimeSlots = () => {
+    const slots = []
+    for (let hour = 9; hour < 17; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        slots.push(
+          format(setMinutes(setHours(new Date(), hour), minute), 'HH:mm')
+        )
+      }
+    }
+    return slots
+  }
+
+  const steps = [
+    {
+      title: 'Select Date',
+      icon: CalendarIcon,
+      isCompleted: !!selectedDate,
+      isActive: !selectedDate,
+    },
+    {
+      title: 'Select Time',
+      icon: Clock,
+      isCompleted: !!selectedTime,
+      isActive: !!selectedDate && !selectedTime,
+    },
+  ]
 
   if (!isSignedIn) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <p className="text-center text-gray-600">
+      <div className="text-center">
+        <p className="text-gray-600 mb-4">
           Please sign in to book this service
         </p>
+        <Button onClick={() => router.push('/sign-in')}>Sign In</Button>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Book Appointment</h2>
-      
-      <div className="mb-6">
-        <div className="flex justify-between text-sm text-gray-600 mb-2">
-          <span>Price</span>
-          <span className="font-semibold">
-            {formatCurrency(parseFloat(service.price))}
-          </span>
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm">
+      <div className="p-6">
+        <h2 className="text-2xl font-semibold mb-2">Book this Service</h2>
+        <p className="text-gray-600 mb-6">Select a date and time to book your appointment</p>
+        
+        <div className="flex gap-8 mb-6">
+          {steps.map((step, index) => (
+            <div
+              key={step.title}
+              className={cn(
+                "flex items-center gap-2",
+                (step.isActive || step.isCompleted) ? "text-primary" : "text-gray-400"
+              )}
+            >
+              <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-current">
+                {step.isCompleted ? (
+                  <CheckCircle2 className="w-5 h-5" />
+                ) : (
+                  <step.icon className="w-5 h-5" />
+                )}
+              </div>
+              <span className="font-medium">{step.title}</span>
+            </div>
+          ))}
         </div>
-        <div className="flex justify-between text-sm text-gray-600 mb-4">
-          <span>Duration</span>
-          <span>{service.duration} minutes</span>
+
+        <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateChange}
+              disabled={(date) =>
+                date < new Date() || date > addDays(new Date(), 30)
+              }
+              className="rounded-md border"
+            />
+          </motion.div>
+
+          <AnimatePresence>
+            {selectedDate && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  {generateTimeSlots().map((time) => {
+                    const isAvailable = true // Replace with actual availability check
+                    return (
+                      <Button
+                        key={time}
+                        type="button"
+                        variant={selectedTime === time ? "default" : "outline"}
+                        className={cn(
+                          "py-6",
+                          selectedTime === time && "bg-primary text-primary-foreground",
+                          !isAvailable && "opacity-50 cursor-not-allowed"
+                        )}
+                        disabled={!isAvailable}
+                        onClick={() => handleTimeChange(time)}
+                      >
+                        {format(parse(time, 'HH:mm', new Date()), 'h:mm a')}
+                      </Button>
+                    )}
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {(selectedDate || selectedTime) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-4 bg-muted rounded-lg"
+            >
+              <h3 className="font-medium mb-2">Booking Summary</h3>
+              <div className="space-y-1 text-sm">
+                {selectedDate && (
+                  <p>Date: {format(selectedDate, 'EEEE, MMMM d, yyyy')}</p>
+                )}
+                {selectedTime && (
+                  <p>Time: {format(parse(selectedTime, 'HH:mm', new Date()), 'h:mm a')}</p>
+                )}
+              </div>
+            </motion.div>
+          )}
         </div>
+
+        {error && (
+          <Alert variant="destructive" className="mt-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
 
-      <div className="mb-4">
-        <label className="block text-gray-700 mb-2">Select Date and Time</label>
-        <DatePicker
-          selected={selectedDate}
-          onChange={handleDateChange}
-          showTimeSelect
-          timeFormat="HH:mm"
-          timeIntervals={30}
-          dateFormat="MMMM d, yyyy h:mm aa"
-          minDate={new Date()}
-          maxDate={addDays(new Date(), 30)}
-          minTime={minTime}
-          maxTime={maxTime}
-          className="w-full p-2 border rounded-md"
-          placeholderText="Select date and time"
-        />
+      <div className="border-t p-6">
+        <Button
+          type="submit"
+          disabled={!selectedDate || !selectedTime || isLoading}
+          className="w-full"
+          size="lg"
+        >
+          {isLoading ? 'Booking...' : `Book Now - ${formatCurrency(parseFloat(service.price))}`}
+        </Button>
       </div>
-
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <Button
-        type="submit"
-        disabled={!selectedDate || isLoading}
-        className="w-full"
-      >
-        {isLoading ? 'Booking...' : 'Book Now'}
-      </Button>
     </form>
   )
 }
+

@@ -1,13 +1,9 @@
 import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
-import { Outfit } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import Navbar from '@/components/layout/nav'
 
-const outfit = Outfit({ 
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-outfit',
-})
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'Beauty Booking',
@@ -22,9 +18,10 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${outfit.variable} ${outfit.className} font-sans`}>
+        <body className={inter.className}>
           <Navbar />
-          {children}
+          
+            {children}
         </body>
       </html>
     </ClerkProvider>
