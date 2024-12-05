@@ -20,7 +20,7 @@ module.exports = {
 		  primary: '#FF6B6B',
 		  secondary: '#4ECDC4',
 		  accent: '#FFE66D',
-		  background: '#F7F7F7',
+		  bg: '#F7F7F7',
 		  dark: '#2C363F',
 		  border: "hsl(var(--border))",
 		  input: "hsl(var(--input))",
@@ -46,6 +46,9 @@ module.exports = {
 		animation: {
 		  "accordion-down": "accordion-down 0.2s ease-out",
 		  "accordion-up": "accordion-up 0.2s ease-out",
+		},
+		fontFamily: {
+		  sans: ['var(--font-outfit)'],
 		},
 	  },
 	},

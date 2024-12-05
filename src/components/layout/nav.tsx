@@ -9,6 +9,13 @@ import { Button } from "@/components/ui/button"
 import { Search, Menu } from "lucide-react"
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Outfit } from 'next/font/google'
+
+const outfit = Outfit({ 
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-outfit',
+})
 
 const mainNavItems = [
   {
@@ -34,13 +41,21 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <nav className={cn(
+      "sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60",
+      outfit.variable
+    )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo & Brand */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-rose-600">BeautyBook</span>
+              <span className={cn(
+                "text-2xl font-bold text-rose-600",
+                outfit.className
+              )}>
+                BeautyBook
+              </span>
             </Link>
           </div>
 
@@ -52,6 +67,7 @@ export default function Navbar() {
                 href={item.href}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-rose-600",
+                  outfit.className,
                   pathname === item.href
                     ? "text-rose-600"
                     : "text-gray-600"
