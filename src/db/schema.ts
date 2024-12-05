@@ -7,6 +7,7 @@ import {
   varchar,
   integer,
   decimal,
+  boolean
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
@@ -25,6 +26,18 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
 })
+
+export const availability = pgTable('availability', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  providerId: uuid('provider_id').references(() => users.id).notNull(),
+  dayOfWeek: text('day_of_week').notNull(),
+  startTime: text('start_time').notNull(),
+  endTime: text('end_time').notNull(),
+  enabled: boolean('enabled').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 
 // Services Table
 export const services = pgTable('services', {
@@ -116,4 +129,11 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
     references: [users.id],
     relationName: 'reviewCustomer'
   })
+}))
+
+export const availabilityRelations = relations(availability, ({ one }) => ({
+  provider: one(users, {
+    fields: [availability.providerId],
+    references: [users.id],
+  }),
 }))

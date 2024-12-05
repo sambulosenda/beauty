@@ -20,3 +20,4 @@ export const formatDuration = (minutes: number): string => {
   const mins = minutes % 60
   return `${hours ? `${hours}h ` : ''}${mins}min`
 }
+

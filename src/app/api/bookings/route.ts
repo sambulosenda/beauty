@@ -8,13 +8,11 @@ import { eq } from 'drizzle-orm'
 
 export async function POST(request: Request) {
   try {
-    // Get the authenticated user from Clerk
     const clerkUser = await currentUser()
     if (!clerkUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Find the user in our database
     const dbUser = await db.query.users.findFirst({
       where: eq(users.clerkId, clerkUser.id)
     })
@@ -23,7 +21,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User not found in database' }, { status: 404 })
     }
 
-    // Get request body
     const data = await request.json()
     const { serviceId, providerId, date } = data
 
@@ -34,7 +31,6 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get service to use its duration
     const service = await db.query.services.findFirst({
       where: eq(services.id, serviceId)
     })
@@ -46,7 +42,6 @@ export async function POST(request: Request) {
     const startTime = new Date(date)
     const endTime = addMinutes(startTime, service.duration)
 
-    // Create the booking
     const [booking] = await db.insert(bookings).values({
       serviceId,
       providerId,
@@ -82,9 +77,12 @@ export async function GET(request: Request) {
     }
 
     const userBookings = await db.query.bookings.findMany({
-      where: eq(bookings.customerId, dbUser.id),
+      where: dbUser.role === 'PROVIDER' 
+        ? eq(bookings.providerId, dbUser.id)
+        : eq(bookings.customerId, dbUser.id),
       with: {
         service: true,
+        customer: true,
         provider: true,
       }
     })
@@ -98,4 +96,3 @@ export async function GET(request: Request) {
     )
   }
 }
-
