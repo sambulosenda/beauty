@@ -5,6 +5,7 @@ import { bookings, users, services } from '@/db/schema'
 import { currentUser } from '@clerk/nextjs/server'
 import { addMinutes } from 'date-fns'
 import { eq } from 'drizzle-orm'
+import { sendBookingConfirmation, sendProviderNotification } from '@/lib/emails'
 
 export async function POST(request: Request) {
   try {
@@ -31,12 +32,20 @@ export async function POST(request: Request) {
       )
     }
 
+    // Get service and provider details
     const service = await db.query.services.findFirst({
-      where: eq(services.id, serviceId)
+      where: eq(services.id, serviceId),
     })
 
-    if (!service) {
-      return NextResponse.json({ error: 'Service not found' }, { status: 404 })
+    const provider = await db.query.users.findFirst({
+      where: eq(users.id, providerId),
+    })
+
+    if (!service || !provider) {
+      return NextResponse.json(
+        { error: 'Service or provider not found' },
+        { status: 404 }
+      )
     }
 
     const startTime = new Date(date)
@@ -51,6 +60,25 @@ export async function POST(request: Request) {
       status: 'PENDING'
     }).returning()
 
+    // Send confirmation emails
+    await Promise.all([
+      sendBookingConfirmation({
+        customerEmail: dbUser.email,
+        customerName: dbUser.name || 'Customer',
+        serviceName: service.name,
+        date: startTime,
+        providerName: provider.name || 'Provider',
+        bookingId: booking.id
+      }),
+      sendProviderNotification({
+        providerEmail: provider.email,
+        customerName: dbUser.name || 'Customer',
+        serviceName: service.name,
+        date: startTime,
+        bookingId: booking.id
+      })
+    ])
+
     return NextResponse.json(booking)
   } catch (error) {
     console.error('Booking creation error:', error)
@@ -60,6 +88,7 @@ export async function POST(request: Request) {
     )
   }
 }
+
 
 export async function GET(request: Request) {
   try {

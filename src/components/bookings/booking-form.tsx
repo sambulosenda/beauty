@@ -4,38 +4,55 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import DatePicker from 'react-datepicker'
+import { addDays, setHours, setMinutes } from 'date-fns'
 import "react-datepicker/dist/react-datepicker.css"
 import { formatCurrency } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { checkAvailability } from '@/lib/availability'
 
-interface Provider {
-  id: string
-  name: string | null
-  businessName: string | null
-  description: string | null
+interface BookingFormProps {
+  service: {
+    id: string
+    name: string
+    price: string
+    duration: number
+    providerId: string
+  }
 }
 
-interface ServiceWithProvider {
-  id: string
-  name: string
-  description: string | null
-  price: string
-  duration: number
-  providerId: string
-  category: string
-  provider: Provider
-}
-
-export default function BookingForm({ service }: { service: ServiceWithProvider }) {
+export default function BookingForm({ service }: BookingFormProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { user, isSignedIn } = useUser()
   const router = useRouter()
 
+  const handleDateChange = async (date: Date | null) => {
+    setError(null)
+    setSelectedDate(date)
+
+    if (date) {
+      try {
+        const availability = await checkAvailability(
+          service.providerId,
+          date,
+          service.duration
+        )
+
+        if (!availability.available) {
+          setError(availability.reason || 'Time slot not available')
+          setSelectedDate(null)
+        }
+      } catch (error) {
+        setError('Error checking availability')
+        setSelectedDate(null)
+      }
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-
     if (!selectedDate || !isSignedIn) {
       setError('Please select a date and time')
       return
@@ -43,12 +60,6 @@ export default function BookingForm({ service }: { service: ServiceWithProvider 
 
     setIsLoading(true)
     try {
-      console.log('Sending booking request:', {
-        serviceId: service.id,
-        providerId: service.providerId,
-        date: selectedDate,
-      })
-
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: {
@@ -70,12 +81,15 @@ export default function BookingForm({ service }: { service: ServiceWithProvider 
       router.push(`/bookings/${data.id}`)
       router.refresh()
     } catch (error) {
-      console.error('Booking error:', error)
-      setError(error instanceof Error ? error.message : 'Failed to create booking')
+      const message = error instanceof Error ? error.message : 'Failed to create booking'
+      setError(message)
     } finally {
       setIsLoading(false)
     }
   }
+
+  const minTime = setHours(setMinutes(new Date(), 0), 9)
+  const maxTime = setHours(setMinutes(new Date(), 0), 17)
 
   if (!isSignedIn) {
     return (
@@ -94,7 +108,9 @@ export default function BookingForm({ service }: { service: ServiceWithProvider 
       <div className="mb-6">
         <div className="flex justify-between text-sm text-gray-600 mb-2">
           <span>Price</span>
-          <span className="font-semibold">{formatCurrency(parseFloat(service.price))}</span>
+          <span className="font-semibold">
+            {formatCurrency(parseFloat(service.price))}
+          </span>
         </div>
         <div className="flex justify-between text-sm text-gray-600 mb-4">
           <span>Duration</span>
@@ -106,30 +122,33 @@ export default function BookingForm({ service }: { service: ServiceWithProvider 
         <label className="block text-gray-700 mb-2">Select Date and Time</label>
         <DatePicker
           selected={selectedDate}
-          onChange={(date) => setSelectedDate(date)}
+          onChange={handleDateChange}
           showTimeSelect
           timeFormat="HH:mm"
           timeIntervals={30}
           dateFormat="MMMM d, yyyy h:mm aa"
           minDate={new Date()}
+          maxDate={addDays(new Date(), 30)}
+          minTime={minTime}
+          maxTime={maxTime}
           className="w-full p-2 border rounded-md"
           placeholderText="Select date and time"
         />
       </div>
 
       {error && (
-        <div className="mb-4 p-3 text-sm text-red-500 bg-red-50 rounded-md">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={!selectedDate || isLoading}
-        className="w-full bg-rose-600 text-white py-2 px-4 rounded-md hover:bg-rose-700 disabled:bg-gray-400 transition-colors"
+        className="w-full"
       >
         {isLoading ? 'Booking...' : 'Book Now'}
-      </button>
+      </Button>
     </form>
   )
 }
