@@ -96,7 +96,6 @@ export async function generateMetadata({ params }: ServicePageProps) {
       description: 'The requested service could not be found.'
     }
   }
-
   return {
     title: `${service.name} | Beauty Services`,
     description: service.description || `Book ${service.name} service now`

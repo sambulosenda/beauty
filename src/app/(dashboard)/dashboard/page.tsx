@@ -24,11 +24,16 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex min-h-screen">
-      <DashboardNav />
-      <main className="flex-1 p-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <div className="mt-4">
+      <main className="flex-1 p-8 bg-gray-50">
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Welcome back, {provider.name}</h1>
+            <p className="text-gray-500 mt-2">Here's what's happening with your business today.</p>
+          </div>
+
           <DashboardStats providerId={provider.id} />
+
+        
         </div>
       </main>
     </div>
