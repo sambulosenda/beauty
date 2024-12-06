@@ -9,6 +9,8 @@ import { Metadata } from 'next'
 import { ReviewForm } from '@/components/reviews/review-form'
 import { ReviewsList } from '@/components/reviews/reviews-list'
 import { Clock, MapPin, Calendar, CheckCircle2, AlertCircle } from 'lucide-react'
+import { BookingStatusUpdate } from '@/components/bookings/booking-status-update'
+import { ClientBookingStatus } from '@/components/bookings/client-booking-status'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -141,6 +143,10 @@ export default async function BookingPage(props: PageProps) {
             </div>
           </div>
         </div>
+
+        {/* Add the Status Update Component here */}
+        <ClientBookingStatus bookingId={booking.id} currentStatus={booking.status} />
+
 
         {/* Main Content */}
         <div className="bg-white rounded-2xl p-8 shadow-sm space-y-8">

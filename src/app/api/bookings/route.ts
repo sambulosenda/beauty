@@ -3,9 +3,73 @@ import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { bookings, users, services } from '@/db/schema'
 import { currentUser } from '@clerk/nextjs/server'
-import { addMinutes } from 'date-fns'
-import { eq } from 'drizzle-orm'
+import { addMinutes, startOfDay, endOfDay } from 'date-fns'
+import { eq, and, gte, lte } from 'drizzle-orm'
 import { sendBookingConfirmation, sendProviderNotification } from '@/lib/emails'
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const dateParam = searchParams.get('date')
+
+    const clerkUser = await currentUser()
+    if (!clerkUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const dbUser = await db.query.users.findFirst({
+      where: eq(users.clerkId, clerkUser.id)
+    })
+
+    if (!dbUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    // If date param exists, filter by date for calendar view
+    if (dateParam) {
+      const date = new Date(dateParam)
+      const dayStart = startOfDay(date)
+      const dayEnd = endOfDay(date)
+
+      const bookingsForDay = await db.query.bookings.findMany({
+        where: and(
+          dbUser.role === 'PROVIDER'
+            ? eq(bookings.providerId, dbUser.id)
+            : eq(bookings.customerId, dbUser.id),
+          gte(bookings.startTime, dayStart),
+          lte(bookings.startTime, dayEnd)
+        ),
+        with: {
+          service: true,
+          customer: true,
+          provider: true,
+        }
+      })
+
+      return NextResponse.json(bookingsForDay)
+    }
+
+    // If no date param, return all bookings
+    const userBookings = await db.query.bookings.findMany({
+      where: dbUser.role === 'PROVIDER'
+        ? eq(bookings.providerId, dbUser.id)
+        : eq(bookings.customerId, dbUser.id),
+      with: {
+        service: true,
+        customer: true,
+        provider: true,
+      }
+    })
+
+    return NextResponse.json(userBookings)
+  } catch (error) {
+    console.error('Error fetching bookings:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch bookings' },
+      { status: 500 }
+    )
+  }
+}
 
 export async function POST(request: Request) {
   try {
@@ -84,43 +148,6 @@ export async function POST(request: Request) {
     console.error('Booking creation error:', error)
     return NextResponse.json(
       { error: 'Failed to create booking' },
-      { status: 500 }
-    )
-  }
-}
-
-
-export async function GET(request: Request) {
-  try {
-    const clerkUser = await currentUser()
-    if (!clerkUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const dbUser = await db.query.users.findFirst({
-      where: eq(users.clerkId, clerkUser.id)
-    })
-
-    if (!dbUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    const userBookings = await db.query.bookings.findMany({
-      where: dbUser.role === 'PROVIDER' 
-        ? eq(bookings.providerId, dbUser.id)
-        : eq(bookings.customerId, dbUser.id),
-      with: {
-        service: true,
-        customer: true,
-        provider: true,
-      }
-    })
-
-    return NextResponse.json(userBookings)
-  } catch (error) {
-    console.error('Error fetching bookings:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch bookings' },
       { status: 500 }
     )
   }

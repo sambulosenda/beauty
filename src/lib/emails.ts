@@ -76,3 +76,42 @@ export async function sendProviderNotification({
     console.error('Failed to send provider notification:', error)
   }
 }
+
+
+export async function sendBookingUpdate({
+    customerEmail,
+    customerName,
+    serviceName,
+    bookingId,
+    status,
+    date,
+  }: {
+    customerEmail: string
+    customerName: string
+    serviceName: string
+    bookingId: string
+    status: string
+    date: Date
+  }) {
+    try {
+      await resend.emails.send({
+        from: 'BeautyBook <bookings@yourdomain.com>',
+        to: customerEmail,
+        subject: `Booking Update - ${status}`,
+        html: `
+          <h1>Booking Status Update</h1>
+          <p>Hi ${customerName},</p>
+          <p>Your booking for ${serviceName} has been ${status.toLowerCase()}.</p>
+          <p>
+            <strong>Booking ID:</strong> ${bookingId}<br/>
+            <strong>Date:</strong> ${date.toLocaleDateString()}<br/>
+            <strong>Time:</strong> ${date.toLocaleTimeString()}<br/>
+            <strong>New Status:</strong> ${status}<br/>
+          </p>
+          <p>View your booking details <a href="${process.env.NEXT_PUBLIC_APP_URL}/bookings/${bookingId}">here</a></p>
+        `
+      })
+    } catch (error) {
+      console.error('Failed to send booking update email:', error)
+    }
+  }

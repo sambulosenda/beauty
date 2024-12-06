@@ -82,11 +82,24 @@ export function NavbarAuth() {
           Sign In
         </Button>
       </SignInButton>
-      <SignInButton mode="modal">
-        <Button size="sm" variant="default" className="hidden md:flex bg-rose-600 hover:bg-rose-700">
-          Get Started
-        </Button>
-      </SignInButton>
+      
+      <div className="hidden md:flex gap-2">
+        <Link href="/sign-up">
+          <Button size="sm" variant="outline">
+            Sign Up
+          </Button>
+        </Link>
+        <Link href="/business-signup">
+          <Button 
+            size="sm" 
+            variant="default" 
+            className="bg-rose-600 hover:bg-rose-700"
+          >
+            List Your Business
+          </Button>
+        </Link>
+      </div>
+      
       {/* Mobile sign in button is handled in the Sheet menu */}
     </div>
   )

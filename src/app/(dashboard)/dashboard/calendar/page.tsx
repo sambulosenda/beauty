@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
-import { Calendar } from './calendar'
+import { CalendarView } from './calendar-view'
 
 export default async function CalendarPage() {
   const { userId } = await auth()
@@ -23,7 +23,7 @@ export default async function CalendarPage() {
   return (
     <div className="flex-1 p-8">
       <h1 className="text-2xl font-bold mb-8">Booking Calendar</h1>
-      <Calendar providerId={provider.id} />
+      <CalendarView providerId={provider.id} />
     </div>
   )
 }
