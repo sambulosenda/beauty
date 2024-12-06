@@ -13,10 +13,16 @@ export default async function BusinessOnboardingPage() {
 
   // Check if user has already completed onboarding
   const existingUser = await db.query.users.findFirst({
-    where: eq(users.clerkId, userId)
+    where: eq(users.clerkId, userId),
+    columns: {
+      role: true,
+      businessName: true,
+      slug: true
+    }
   })
 
-  if (existingUser?.role === 'PROVIDER') {
+  // If user has completed business registration, redirect to their dashboard
+  if (existingUser?.businessName && existingUser?.slug) {
     redirect('/dashboard')
   }
 

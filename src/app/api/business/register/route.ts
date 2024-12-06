@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { auth } from '@clerk/nextjs/server'
-import { clerkClient } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
+import slugify from 'slugify'
 
 export async function POST(request: Request) {
   try {
@@ -13,29 +13,40 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json()
-    console.log('Received registration data:', data)
+    
+    // Generate slug from business name
+    let slug = slugify(data.businessName, { lower: true })
+    
+    // Check if slug exists and append number if needed
+    let slugExists = true
+    let counter = 0
+    let finalSlug = slug
+    
+    while (slugExists) {
+      const existing = await db.query.users.findFirst({
+        where: eq(users.slug, finalSlug)
+      })
+      if (!existing) {
+        slugExists = false
+      } else {
+        counter++
+        finalSlug = `${slug}-${counter}`
+      }
+    }
 
-    // Update existing user with business details
+    // Update user with business details and slug
     const [updated] = await db
       .update(users)
       .set({
         role: 'PROVIDER',
         businessName: data.businessName,
+        slug: finalSlug,
         address: data.address,
         phone: data.phone,
         description: data.description,
       })
       .where(eq(users.clerkId, userId))
       .returning()
-
-    if (!updated) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-
 
     return NextResponse.json(updated)
   } catch (error) {

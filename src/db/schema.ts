@@ -14,6 +14,7 @@ import { relations } from 'drizzle-orm'
 // Users Table
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
+  slug: text('slug').unique(),
   clerkId: text('clerk_id').unique().notNull(),
   role: text('role', { enum: ['CUSTOMER', 'PROVIDER', 'ADMIN'] }).default('CUSTOMER').notNull(),
   email: text('email').unique().notNull(),
