@@ -11,6 +11,16 @@ import {
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
+export const serviceCategories = [
+  'Hair',
+  'Nails',
+  'Makeup',
+  'Skincare',
+  'Massage',
+  'Spa',
+  'Other'
+] as const
+
 // Users Table
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),

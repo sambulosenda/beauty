@@ -33,16 +33,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const data = await req.json()
-    const { name, description, price, duration, category } = data
+    const { name, description, price, duration, category, image, providerId } = await req.json()
 
-    const [service] = await db.insert(services).values({
+    const service = await db.insert(services).values({
       name,
       description,
       price,
       duration,
       category,
-      providerId: dbUser.id
+      providerId,
+      image
     }).returning()
 
     return NextResponse.json(service)

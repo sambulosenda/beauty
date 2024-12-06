@@ -16,6 +16,15 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { ImageUpload } from '@/components/ui/image-upload'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { serviceCategories } from "@/db/schema"
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -23,26 +32,43 @@ const formSchema = z.object({
   price: z.string().min(1, 'Price is required'),
   duration: z.string().min(1, 'Duration is required'),
   category: z.string().min(1, 'Category is required'),
+  image: z.string().min(1, 'Image is required'),
 })
 
-export default function ServiceForm({ providerId }: { providerId: string }) {
+interface ServiceFormProps {
+  providerId: string
+  initialData?: {
+    name: string
+    description: string
+    price: string
+    duration: string
+    category: string
+    image: string
+  }
+  serviceId?: string
+}
+
+export default function ServiceForm({ providerId, initialData, serviceId }: ServiceFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      description: '',
-      price: '',
-      duration: '',
-      category: '',
+      name: initialData?.name || '',
+      description: initialData?.description || '',
+      price: initialData?.price || '',
+      duration: initialData?.duration || '',
+      category: initialData?.category || '',
+      image: initialData?.image || '',
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
     try {
+      console.log('Submitting form with values:', values)
+      
       const response = await fetch('/api/services', {
         method: 'POST',
         headers: {
@@ -53,8 +79,12 @@ export default function ServiceForm({ providerId }: { providerId: string }) {
           providerId,
           price: parseFloat(values.price),
           duration: parseInt(values.duration),
+          image: values.image,
         }),
       })
+
+      const data = await response.json()
+      console.log('Response from API:', data)
 
       if (!response.ok) {
         throw new Error('Failed to create service')
@@ -72,6 +102,24 @@ export default function ServiceForm({ providerId }: { providerId: string }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Service Image</FormLabel>
+              <FormControl>
+                <ImageUpload 
+                  value={field.value || ''} 
+                  onChange={field.onChange}
+                  disabled={isLoading} 
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="name"
@@ -136,9 +184,24 @@ export default function ServiceForm({ providerId }: { providerId: string }) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <Select 
+                disabled={isLoading} 
+                onValueChange={field.onChange} 
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {serviceCategories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
