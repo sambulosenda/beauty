@@ -20,7 +20,6 @@ const businessFormSchema = z.object({
   businessName: z.string().min(2, "Business name must be at least 2 characters"),
   address: z.string().min(5, "Please enter a valid address"),
   phone: z.string().min(10, "Please enter a valid phone number"),
-  category: z.string().min(1, "Please select a business category"),
   description: z.string().optional(),
 })
 
@@ -34,7 +33,6 @@ export function BusinessOnboardingForm() {
       businessName: '',
       address: '',
       phone: '',
-      category: '',
       description: ''
     }
   })

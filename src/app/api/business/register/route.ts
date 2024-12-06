@@ -3,6 +3,7 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import { auth } from '@clerk/nextjs/server'
 import { clerkClient } from '@clerk/nextjs/server'
+import { eq } from 'drizzle-orm'
 
 export async function POST(request: Request) {
   try {
@@ -12,25 +13,31 @@ export async function POST(request: Request) {
     }
 
     const data = await request.json()
-    console.log('Received registration data:', data) // Debug log
+    console.log('Received registration data:', data)
 
-    const client = await clerkClient()
+    // Update existing user with business details
+    const [updated] = await db
+      .update(users)
+      .set({
+        role: 'PROVIDER',
+        businessName: data.businessName,
+        address: data.address,
+        phone: data.phone,
+        description: data.description,
+      })
+      .where(eq(users.clerkId, userId))
+      .returning()
+
+    if (!updated) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
 
 
-    const user = await client.users.getUser(userId)
-    const [business] = await db.insert(users).values({
-      clerkId: userId,
-      name: user.firstName || '',
-      email: user.emailAddresses[0].emailAddress,
-      role: 'PROVIDER',
-      businessName: data.businessName,
-      address: data.address,
-      phone: data.phone,
-      description: data.description,
-    }).returning()
 
-    console.log('Created business:', business) // Debug log
-    return NextResponse.json(business)
+    return NextResponse.json(updated)
   } catch (error) {
     console.error('API error:', error)
     return NextResponse.json(
