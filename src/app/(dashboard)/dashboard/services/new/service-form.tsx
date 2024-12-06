@@ -67,10 +67,14 @@ export default function ServiceForm({ providerId, initialData, serviceId }: Serv
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
     try {
-      console.log('Submitting form with values:', values)
+      const url = serviceId 
+        ? `/api/services/${serviceId}` 
+        : '/api/services'
       
-      const response = await fetch('/api/services', {
-        method: 'POST',
+      const method = serviceId ? 'PATCH' : 'POST'
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -79,21 +83,15 @@ export default function ServiceForm({ providerId, initialData, serviceId }: Serv
           providerId,
           price: parseFloat(values.price),
           duration: parseInt(values.duration),
-          image: values.image,
         }),
       })
 
-      const data = await response.json()
-      console.log('Response from API:', data)
-
-      if (!response.ok) {
-        throw new Error('Failed to create service')
-      }
+      if (!response.ok) throw new Error('Failed to save service')
 
       router.push('/dashboard/services')
       router.refresh()
     } catch (error) {
-      console.error('Error creating service:', error)
+      console.error('Error saving service:', error)
     } finally {
       setIsLoading(false)
     }
