@@ -7,6 +7,7 @@ import {
   varchar,
   integer,
   decimal,
+  time,
   boolean
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
@@ -41,14 +42,25 @@ export const users = pgTable('users', {
 export const availability = pgTable('availability', {
   id: uuid('id').defaultRandom().primaryKey(),
   providerId: uuid('provider_id').references(() => users.id).notNull(),
-  dayOfWeek: text('day_of_week').notNull(),
+  dayOfWeek: text('day_of_week', {
+    enum: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
+  }).notNull(),
   startTime: text('start_time').notNull(),
   endTime: text('end_time').notNull(),
-  enabled: boolean('enabled').default(true).notNull(),
+  isAvailable: boolean('is_available').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
 })
 
+export const breaks = pgTable('breaks', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  providerId: uuid('provider_id').references(() => users.id).notNull(),
+  startTime: timestamp('start_time').notNull(),
+  endTime: timestamp('end_time').notNull(),
+  description: text('description'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+})
 
 // Services Table
 export const services = pgTable('services', {

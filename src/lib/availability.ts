@@ -1,5 +1,5 @@
 // lib/availability.ts
-import { addMinutes, format, parseISO, isWithinInterval } from 'date-fns'
+import { addMinutes, isWithinInterval, parseISO } from 'date-fns'
 
 export async function checkAvailability(
   providerId: string,
@@ -7,46 +7,56 @@ export async function checkAvailability(
   duration: number
 ): Promise<{ available: boolean; reason?: string }> {
   try {
-    // First, get all bookings for the day
-    const bookingsResponse = await fetch(`/api/bookings/check?providerId=${providerId}&date=${startTime.toISOString()}`)
-    if (!bookingsResponse.ok) {
-      throw new Error('Failed to check existing bookings')
-    }
-    
-    const existingBookings = await bookingsResponse.json()
-    
-    // Check for booking conflicts
-    const endTime = addMinutes(startTime, duration)
-    const hasConflict = existingBookings.some((booking: any) => {
-      const bookingStart = new Date(booking.startTime)
-      const bookingEnd = new Date(booking.endTime)
-      return (
-        isWithinInterval(startTime, { start: bookingStart, end: bookingEnd }) ||
-        isWithinInterval(endTime, { start: bookingStart, end: bookingEnd }) ||
-        isWithinInterval(bookingStart, { start: startTime, end: endTime })
-      )
+    // Add console.log for debugging
+    console.log('Checking availability for:', {
+      providerId,
+      startTime,
+      duration
     })
 
-    if (hasConflict) {
+    const availabilityResponse = await fetch(`/api/availability/${providerId}`)
+    const availabilitySettings = await availabilityResponse.json()
+    
+    // Handle empty or invalid response
+    if (!Array.isArray(availabilitySettings)) {
       return {
         available: false,
-        reason: 'Time slot is already booked'
+        reason: 'No availability settings found'
       }
     }
 
-    // Basic time validation
-    const hour = startTime.getHours()
-    if (hour < 9 || hour > 17) {
+    // Add console.log for debugging
+    console.log('Availability settings:', availabilitySettings)
+
+    const dayOfWeek = startTime.toLocaleString('en-US', { weekday: 'long' }).toUpperCase()
+    console.log('Day of week:', dayOfWeek)
+
+    // Check if provider works this day
+    const dayAvailability = availabilitySettings.find(
+      (a: any) => a.dayOfWeek === dayOfWeek
+    )
+    
+    console.log('Day availability:', dayAvailability)
+
+    if (!dayAvailability) {
       return {
         available: false,
-        reason: 'Bookings are only available between 9 AM and 5 PM'
+        reason: `Provider is not available on ${dayOfWeek}`
       }
     }
 
-    // All checks passed
-    return {
-      available: true
+    // Rest of the function remains the same
+    const workStart = parseISO(`${startTime.toISOString().split('T')[0]}T${dayAvailability.startTime}`)
+    const workEnd = parseISO(`${startTime.toISOString().split('T')[0]}T${dayAvailability.endTime}`)
+    
+    if (!isWithinInterval(startTime, { start: workStart, end: workEnd })) {
+      return {
+        available: false,
+        reason: `Time is outside provider's working hours (${dayAvailability.startTime}-${dayAvailability.endTime})`
+      }
     }
+
+    return { available: true }
   } catch (error) {
     console.error('Error checking availability:', error)
     return {

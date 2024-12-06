@@ -1,18 +1,11 @@
 // app/dashboard/availability/availability-form.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { useToast } from "@/hooks/use-toast"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
+import { useState, useEffect } from 'react'
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -20,74 +13,62 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useToast } from "@/hooks/use-toast"
 
-type Day = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday'
-
-const DAYS: Day[] = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday'
-]
-
-interface TimeSlot {
-  enabled: boolean
-  start: string
-  end: string
-}
-
-type AvailabilityState = Record<Day, TimeSlot>
-
-const HOURS = Array.from({ length: 24 }, (_, i) => 
-  i.toString().padStart(2, '0') + ':00'
+const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
+const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => 
+  `${i.toString().padStart(2, '0')}:00`
 )
 
-const defaultAvailability = Object.fromEntries(
-  DAYS.map(day => [
-    day,
-    {
-      enabled: false,
-      start: '09:00',
-      end: '17:00'
-    }
-  ])
-) as AvailabilityState
+interface AvailabilityState {
+  [key: string]: {
+    enabled: boolean
+    startTime: string
+    endTime: string
+  }
+}
 
 export default function AvailabilityForm({ providerId }: { providerId: string }) {
   const [isLoading, setIsLoading] = useState(false)
-  const [availability, setAvailability] = useState<AvailabilityState>(defaultAvailability)
   const { toast } = useToast()
 
+  const [availability, setAvailability] = useState<AvailabilityState>(() => {
+    const initial: AvailabilityState = {}
+    DAYS.forEach(day => {
+      initial[day] = {
+        enabled: false,
+        startTime: '09:00',
+        endTime: '17:00'
+      }
+    })
+    return initial
+  })
+
+  // Load existing settings
   useEffect(() => {
-    const fetchAvailability = async () => {
+    async function loadAvailability() {
       try {
-        const response = await fetch('/api/availability')
-        if (!response.ok) throw new Error('Failed to fetch availability')
-        
+        console.log('Loading availability for provider:', providerId)
+        const response = await fetch(`/api/availability/${providerId}`)
         const data = await response.json()
+        console.log('Loaded availability:', data)
         
-        if (data.length > 0) {
-          const formattedData = Object.fromEntries(
-            DAYS.map(day => {
-              const dayData = data.find((item: any) => item.dayOfWeek === day)
-              return [
-                day,
-                dayData ? {
-                  enabled: dayData.enabled,
-                  start: dayData.startTime,
-                  end: dayData.endTime
-                } : defaultAvailability[day]
-              ]
-            })
-          ) as AvailabilityState
+        if (Array.isArray(data) && data.length > 0) {
+          const newAvailability: AvailabilityState = { ...availability }
           
-          setAvailability(formattedData)
+          data.forEach((setting) => {
+            newAvailability[setting.dayOfWeek] = {
+              enabled: true,
+              startTime: setting.startTime,
+              endTime: setting.endTime
+            }
+          })
+          
+          setAvailability(newAvailability)
+          console.log('Updated form state:', newAvailability)
         }
       } catch (error) {
-        console.error('Error fetching availability:', error)
+        console.error('Error loading availability:', error)
         toast({
           title: 'Error',
           description: 'Failed to load availability settings',
@@ -96,30 +77,40 @@ export default function AvailabilityForm({ providerId }: { providerId: string })
       }
     }
 
-    fetchAvailability()
-  }, [])
+    loadAvailability()
+  }, [providerId])
 
   const handleSubmit = async () => {
     setIsLoading(true)
     try {
+      console.log('Saving availability:', availability)
       const response = await fetch('/api/availability', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          availability
-        }),
+          providerId,
+          availabilityData: Object.entries(availability)
+            .filter(([_, value]) => value.enabled)
+            .map(([day, value]) => ({
+              dayOfWeek: day,
+              startTime: value.startTime,
+              endTime: value.endTime,
+              isAvailable: true
+            }))
+        })
       })
 
       if (!response.ok) throw new Error('Failed to update availability')
+      
+      const savedData = await response.json()
+      console.log('Saved successfully:', savedData)
       
       toast({
         title: 'Success',
         description: 'Availability settings updated',
       })
     } catch (error) {
-      console.error('Error updating availability:', error)
+      console.error('Error saving availability:', error)
       toast({
         title: 'Error',
         description: 'Failed to update availability settings',
@@ -139,7 +130,7 @@ export default function AvailabilityForm({ providerId }: { providerId: string })
         {DAYS.map((day) => (
           <Card key={day}>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
                 <Checkbox
                   id={`${day}-enabled`}
                   checked={availability[day].enabled}
@@ -154,71 +145,68 @@ export default function AvailabilityForm({ providerId }: { providerId: string })
                   }
                 />
                 <Label htmlFor={`${day}-enabled`}>{day}</Label>
-              </CardTitle>
-              <CardDescription>Set your working hours for {day}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-4">
-                <div className="grid w-full items-center gap-1.5">
-                  <Label htmlFor={`${day}-start`}>Start Time</Label>
-                  <Select
-                    disabled={!availability[day].enabled}
-                    value={availability[day].start}
-                    onValueChange={(value) =>
-                      setAvailability({
-                        ...availability,
-                        [day]: {
-                          ...availability[day],
-                          start: value
-                        }
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {HOURS.map((hour) => (
-                        <SelectItem key={hour} value={hour}>
-                          {hour}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid w-full items-center gap-1.5">
-                  <Label htmlFor={`${day}-end`}>End Time</Label>
-                  <Select
-                    disabled={!availability[day].enabled}
-                    value={availability[day].end}
-                    onValueChange={(value) =>
-                      setAvailability({
-                        ...availability,
-                        [day]: {
-                          ...availability[day],
-                          end: value
-                        }
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {HOURS.map((hour) => (
-                        <SelectItem key={hour} value={hour}>
-                          {hour}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
-            </CardContent>
+              {availability[day].enabled && (
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <Label>Start Time</Label>
+                    <Select
+                      value={availability[day].startTime}
+                      onValueChange={(value) =>
+                        setAvailability({
+                          ...availability,
+                          [day]: {
+                            ...availability[day],
+                            startTime: value
+                          }
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>End Time</Label>
+                    <Select
+                      value={availability[day].endTime}
+                      onValueChange={(value) =>
+                        setAvailability({
+                          ...availability,
+                          [day]: {
+                            ...availability[day],
+                            endTime: value
+                          }
+                        })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+            </CardHeader>
           </Card>
         ))}
       </div>
-      <Button type="submit" disabled={isLoading} className="mt-6">
+      <Button className="mt-4" type="submit" disabled={isLoading}>
         {isLoading ? 'Saving...' : 'Save Availability'}
       </Button>
     </form>

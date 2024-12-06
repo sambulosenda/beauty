@@ -36,6 +36,34 @@
       "when": 1733495359830,
       "tag": "0004_jazzy_quasar",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1733510824451,
+      "tag": "0005_lumpy_garia",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1733511019178,
+      "tag": "0006_perpetual_mariko_yashida",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1733512313201,
+      "tag": "0007_little_ezekiel",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1733513929487,
+      "tag": "0008_left_charles_xavier",
+      "breakpoints": true
     }
   ]
 }

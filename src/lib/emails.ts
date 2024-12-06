@@ -3,6 +3,10 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+const from = process.env.NODE_ENV === 'production'
+  ? 'BeautyBook <bookings@yourdomain.com>'
+  : 'BeautyBook <onboarding@resend.dev>'
+
 export async function sendBookingConfirmation({
   customerEmail,
   customerName,
@@ -20,7 +24,7 @@ export async function sendBookingConfirmation({
 }) {
   try {
     await resend.emails.send({
-      from: 'BeautyBook <bookings@yourdomain.com>',
+      from,
       to: customerEmail,
       subject: 'Booking Confirmation',
       html: `
@@ -56,7 +60,7 @@ export async function sendProviderNotification({
 }) {
   try {
     await resend.emails.send({
-      from: 'BeautyBook <bookings@yourdomain.com>',
+      from,
       to: providerEmail,
       subject: 'New Booking',
       html: `
@@ -95,7 +99,7 @@ export async function sendBookingUpdate({
   }) {
     try {
       await resend.emails.send({
-        from: 'BeautyBook <bookings@yourdomain.com>',
+        from,
         to: customerEmail,
         subject: `Booking Update - ${status}`,
         html: `
@@ -115,3 +119,37 @@ export async function sendBookingUpdate({
       console.error('Failed to send booking update email:', error)
     }
   }
+
+export async function sendServiceUpdateEmail({
+  customerEmails,
+  serviceName,
+  updateType,
+  serviceId,
+}: {
+  customerEmails: string[]
+  serviceName: string
+  updateType: 'updated' | 'cancelled'
+  serviceId: string
+}) {
+  try {
+    const promises = customerEmails.map(email =>
+      resend.emails.send({
+        from,
+        to: email,
+        subject: `Service ${updateType} - ${serviceName}`,
+        html: `
+          <h1>Service ${updateType}</h1>
+          <p>The service "${serviceName}" has been ${updateType}.</p>
+          ${updateType === 'updated' 
+            ? `<p>View the updated service details <a href="${process.env.NEXT_PUBLIC_APP_URL}/services/${serviceId}">here</a></p>`
+            : '<p>We apologize for any inconvenience caused.</p>'
+          }
+        `
+      })
+    )
+
+    await Promise.all(promises)
+  } catch (error) {
+    console.error('Failed to send service update emails:', error)
+  }
+}
