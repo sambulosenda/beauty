@@ -8,7 +8,7 @@ import { formatCurrency } from "@/lib/utils";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, MoreHorizontal } from "lucide-react";
+import { Calendar} from "lucide-react";
 
 export default async function BookingsPage() {
     const { userId } = await auth();
@@ -33,20 +33,19 @@ export default async function BookingsPage() {
       id: bookings.id,
       startTime: bookings.startTime,
       status: bookings.status,
-      service: {
-        name: services.name,
-        price: services.price,
-        duration: services.duration,
-      },
-      provider: {
-        name: users.name,
-        businessName: users.businessName,
-      },
+      'service.name': services.name,
+      'service.price': services.price,
+      'provider.name': users.name,
+      'provider.businessName': users.businessName
     })
     .from(bookings)
     .innerJoin(services, eq(bookings.serviceId, services.id))
     .innerJoin(users, eq(bookings.providerId, users.id))
-    .where(eq(bookings.customerId, dbUser.id))
+    .where(
+      dbUser.role === 'PROVIDER' 
+        ? eq(bookings.providerId, dbUser.id)
+        : eq(bookings.customerId, dbUser.id)
+    )
     .orderBy(bookings.startTime);
 
   return (
@@ -95,8 +94,8 @@ export default async function BookingsPage() {
                   <div key={booking.id} className="grid grid-cols-6 gap-4 p-4 text-sm items-center hover:bg-gray-50">
                     <div>{format(new Date(booking.startTime), "MMM d, yyyy")}</div>
                     <div>{format(new Date(booking.startTime), "h:mm a")}</div>
-                    <div className="font-medium text-gray-900">{booking.service.name}</div>
-                    <div>{booking.provider.businessName || booking.provider.name}</div>
+                    <div className="font-medium text-gray-900">{booking['service.name']}</div>
+                    <div>{booking['provider.businessName'] || booking['provider.name']}</div>
                     <div>
                       <Badge variant={
                         booking.status === "CONFIRMED" ? "outline" :
@@ -107,7 +106,7 @@ export default async function BookingsPage() {
                       </Badge>
                     </div>
                     <div className="text-right font-medium text-gray-900">
-                      {formatCurrency(parseFloat(booking.service.price))}
+                      {formatCurrency(parseFloat(booking['service.price']))}
                     </div>
                   </div>
                 ))}

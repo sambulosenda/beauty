@@ -33,3 +33,5 @@ export default async function DashboardLayout({
     </div>
   )
 } 
+
+export const revalidate = 3600 // Revalidate every hour
