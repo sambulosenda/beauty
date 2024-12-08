@@ -18,12 +18,7 @@ CREATE TABLE IF NOT EXISTS "bookings" (
 	"end_time" timestamp NOT NULL,
 	"status" text DEFAULT 'PENDING' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"stripe_payment_intent_id" text,
-	"stripe_payment_status" text DEFAULT 'pending',
-	"amount" numeric(10, 2) NOT NULL,
-	"currency" text DEFAULT 'usd' NOT NULL,
-	CONSTRAINT "bookings_stripe_payment_intent_id_unique" UNIQUE("stripe_payment_intent_id")
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "breaks" (
@@ -58,17 +53,13 @@ CREATE TABLE IF NOT EXISTS "services" (
 	"category" text NOT NULL,
 	"image" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"stripe_price_id" text,
-	"stripe_product_id" text,
-	CONSTRAINT "services_stripe_price_id_unique" UNIQUE("stripe_price_id"),
-	CONSTRAINT "services_stripe_product_id_unique" UNIQUE("stripe_product_id")
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"slug" text,
-	"clerk_id" text,
+	"clerk_id" text NOT NULL,
 	"role" text DEFAULT 'CUSTOMER' NOT NULL,
 	"email" text NOT NULL,
 	"name" text,
@@ -79,14 +70,9 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"logo" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"stripe_customer_id" text,
-	"stripe_connect_account_id" text,
-	"stripe_account_enabled" boolean DEFAULT false,
 	CONSTRAINT "users_slug_unique" UNIQUE("slug"),
 	CONSTRAINT "users_clerk_id_unique" UNIQUE("clerk_id"),
-	CONSTRAINT "users_email_unique" UNIQUE("email"),
-	CONSTRAINT "users_stripe_customer_id_unique" UNIQUE("stripe_customer_id"),
-	CONSTRAINT "users_stripe_connect_account_id_unique" UNIQUE("stripe_connect_account_id")
+	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 DO $$ BEGIN

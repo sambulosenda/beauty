@@ -8,10 +8,12 @@ import { formatCurrency } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Calendar } from '@/components/ui/calendar'
+import { DayPicker } from "react-day-picker"
 import { checkAvailability } from '@/lib/availability'
 import { CalendarIcon, Clock, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { PaymentWrapper } from '@/components/payments/payment-wrapper'
 
 interface BookingFormProps {
   service: {
@@ -30,6 +32,8 @@ export default function BookingForm({ service }: BookingFormProps) {
   const [error, setError] = useState<string | null>(null)
   const { user, isSignedIn } = useUser()
   const router = useRouter()
+  const [showPayment, setShowPayment] = useState(false)
+  const [bookingId, setBookingId] = useState<string | null>(null)
 
   const handleDateChange = (date: Date | null) => {
     setError(null)
@@ -65,41 +69,29 @@ export default function BookingForm({ service }: BookingFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate || !selectedTime || !isSignedIn) {
-      setError('Please select a date and time')
-      return
-    }
+    if (!selectedDate || !selectedTime || !isSignedIn) return
 
-    setIsLoading(true)
     try {
-      const [hours, minutes] = selectedTime.split(':').map(Number)
-      const dateTime = setMinutes(setHours(selectedDate, hours), minutes)
-
+      const startTime = parse(selectedTime, 'HH:mm', selectedDate)
+      
       const response = await fetch('/api/bookings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           serviceId: service.id,
           providerId: service.providerId,
-          date: dateTime,
+          date: startTime,
         }),
       })
 
-      const data = await response.json()
+      const booking = await response.json()
+      if (booking.error) throw new Error(booking.error)
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create booking')
-      }
-
-      router.push(`/bookings/${data.id}`)
-      router.refresh()
+      setBookingId(booking.id)
+      setShowPayment(true)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create booking'
-      setError(message)
-    } finally {
-      setIsLoading(false)
+      console.error('Booking error:', error)
+      // Handle error...
     }
   }
 
@@ -141,6 +133,15 @@ export default function BookingForm({ service }: BookingFormProps) {
     )
   }
 
+  if (showPayment && bookingId) {
+    return (
+      <PaymentWrapper 
+        bookingId={bookingId}
+        amount={parseFloat(service.price)}
+      />
+    )
+  }
+
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm">
       <div className="p-6">
@@ -175,8 +176,8 @@ export default function BookingForm({ service }: BookingFormProps) {
           >
             <Calendar
               mode="single"
-              selected={selectedDate}
-              onSelect={handleDateChange}
+              selected={selectedDate as Date}
+              onSelect={(date: Date | undefined) => handleDateChange(date || null)}
               disabled={(date) =>
                 date < new Date() || date > addDays(new Date(), 30)
               }

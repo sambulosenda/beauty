@@ -36,7 +36,10 @@ export const users = pgTable('users', {
   phone: text('phone'),
   logo: text('logo'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull()
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  stripeCustomerId: text('stripe_customer_id').unique(),
+  stripeConnectAccountId: text('stripe_connect_account_id').unique(),
+  stripeAccountEnabled: boolean('stripe_account_enabled').default(false),
 })
 
 export const availability = pgTable('availability', {
@@ -88,7 +91,13 @@ export const bookings = pgTable('bookings', {
     enum: ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED']
   }).default('PENDING').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull()
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  stripePaymentIntentId: text('stripe_payment_intent_id').unique(),
+  stripePaymentStatus: text('stripe_payment_status', {
+    enum: ['pending', 'processing', 'succeeded', 'failed']
+  }).default('pending'),
+  amount: decimal('amount', { precision: 10, scale: 2 }),
+  currency: text('currency').default('usd'),
 })
 
 // Reviews Table

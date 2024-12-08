@@ -24,28 +24,37 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create Stripe Connect account for provider
-    const account = await stripe.accounts.create({
-      type: 'standard',
-      email: provider.email,
-      metadata: {
-        userId: provider.id
-      }
-    })
+    try {
+      // Create Stripe Connect account
+      const account = await stripe.accounts.create({
+        type: 'standard',
+        email: provider.email,
+        metadata: {
+          userId: provider.id
+        }
+      })
 
-    await db.update(users)
-      .set({ stripeConnectAccountId: account.id })
-      .where(eq(users.id, provider.id))
+      // Update user with Stripe Connect account ID
+      await db.update(users)
+        .set({ stripeConnectAccountId: account.id })
+        .where(eq(users.id, provider.id))
 
-    // Create account link for onboarding
-    const accountLink = await stripe.accountLinks.create({
-      account: account.id,
-      refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?tab=payments`,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?tab=payments&success=true`,
-      type: 'account_onboarding',
-    })
+      // Create account link for onboarding
+      const accountLink = await stripe.accountLinks.create({
+        account: account.id,
+        refresh_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?tab=payments`,
+        return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?tab=payments&success=true`,
+        type: 'account_onboarding',
+      })
 
-    return NextResponse.json({ url: accountLink.url })
+      return NextResponse.json({ url: accountLink.url })
+    } catch (stripeError) {
+      console.error('Stripe API Error:', stripeError)
+      return NextResponse.json(
+        { error: 'Failed to create Stripe account' },
+        { status: 500 }
+      )
+    }
   } catch (error) {
     console.error('Stripe Connect setup failed:', error)
     return NextResponse.json(

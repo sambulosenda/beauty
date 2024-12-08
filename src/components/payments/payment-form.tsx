@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 interface PaymentFormProps {
   bookingId: string;
@@ -15,6 +16,7 @@ export function PaymentForm({ bookingId, amount }: PaymentFormProps) {
   const elements = useElements();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

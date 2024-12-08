@@ -4,6 +4,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentForm } from './payment-form';
 import { useEffect, useState } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -13,32 +14,57 @@ interface PaymentWrapperProps {
 }
 
 export function PaymentWrapper({ bookingId, amount }: PaymentWrapperProps) {
-  const [clientSecret, setClientSecret] = useState('');
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Create PaymentIntent as soon as the page loads
     fetch('/api/payments/create-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bookingId }),
     })
-      .then((res) => res.json())
-      .then((data) => setClientSecret(data.clientSecret));
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to create payment');
+        }
+        return data;
+      })
+      .then((data) => setClientSecret(data.clientSecret))
+      .catch((err) => {
+        console.error('Payment setup error:', err);
+        setError(err.message);
+      });
   }, [bookingId]);
 
-  if (!clientSecret) return null;
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!clientSecret) {
+    return <div>Loading payment form...</div>;
+  }
 
   return (
-    <Elements
-      stripe={stripePromise}
-      options={{
-        clientSecret,
-        appearance: {
-          theme: 'stripe',
-        },
-      }}
-    >
-      <PaymentForm bookingId={bookingId} amount={amount} />
-    </Elements>
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
+      <Elements
+        stripe={stripePromise}
+        options={{
+          clientSecret,
+          appearance: {
+            theme: 'stripe',
+            variables: {
+              colorPrimary: '#e11d48',
+            },
+          },
+        }}
+      >
+        <PaymentForm bookingId={bookingId} amount={amount} />
+      </Elements>
+    </div>
   );
 } 

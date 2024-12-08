@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:generate": "drizzle-kit generate:pg",
-    "db:push": "drizzle-kit push:pg",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
@@ -33,6 +34,8 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.2",
+    "@stripe/react-stripe-js": "^3.0.0",
+    "@stripe/stripe-js": "^5.2.0",
     "@tanstack/react-query": "^5.62.2",
     "@tanstack/react-query-devtools": "^5.62.2",
     "@tanstack/react-table": "^8.20.5",
@@ -58,9 +61,11 @@
     "slugify": "^1.6.6",
     "sonner": "^1.7.0",
     "sooner": "^1.1.4",
+    "stripe": "^17.4.0",
     "svix": "^1.42.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "tslib": "^2.6.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -80,5 +85,8 @@
     "tailwindcss": "^3.4.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "tslib": "^2.6.2"
   }
 }

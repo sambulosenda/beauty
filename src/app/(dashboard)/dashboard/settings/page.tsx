@@ -5,45 +5,54 @@ import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { StripeConnectButton } from '@/components/payments/stripe-connect-button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { stripe } from "@/lib/stripe"
 
 export default async function SettingsPage() {
   const { userId } = await auth()
-  if (!userId) {
-    redirect('/sign-in')
-  }
+  if (!userId) redirect('/sign-in')
 
-  const provider = await db.query.users.findFirst({
+  const user = await db.query.users.findFirst({
     where: eq(users.clerkId, userId),
   })
 
-  if (!provider || provider.role !== 'PROVIDER') {
-    redirect('/')
+  if (!user) redirect('/')
+
+  // Get Stripe account status
+  let isConnected = false
+  let accountEnabled = false
+  
+  if (user.stripeConnectAccountId) {
+    try {
+      const account = await stripe.accounts.retrieve(user.stripeConnectAccountId)
+      isConnected = true
+      accountEnabled = account.charges_enabled && account.details_submitted
+    } catch (error) {
+      console.error('Error fetching Stripe account:', error)
+    }
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Settings</CardTitle>
-            <CardDescription>
-              Connect your Stripe account to start accepting payments
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <StripeConnectButton 
-              isConnected={!!provider.stripeConnectAccountId}
-              accountEnabled={provider.stripeAccountEnabled ?? false}
-            />
-          </CardContent>
-        </Card>
-        
-        {/* Add other settings cards here */}
-      </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Settings</CardTitle>
+          <CardDescription>
+            {!isConnected 
+              ? 'Connect your Stripe account to start accepting payments'
+              : !accountEnabled 
+                ? 'Complete your Stripe account setup to start accepting payments'
+                : 'Your Stripe account is fully configured'
+            }
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <StripeConnectButton 
+            isConnected={isConnected} 
+            accountEnabled={accountEnabled} 
+          />
+        </CardContent>
+      </Card>
     </div>
   )
 } 
+

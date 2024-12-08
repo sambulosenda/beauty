@@ -37,18 +37,18 @@ export async function POST(req: Request) {
           .where(eq(bookings.stripePaymentIntentId, failedPayment.id))
         break
 
-      case 'account.updated': {
-        const account = event.data.object
-        
-        // Update user's Stripe account status
-        await db
-          .update(users)
-          .set({ 
-            stripeAccountEnabled: account.charges_enabled,
-          })
-          .where(eq(users.stripeConnectAccountId, account.id))
-        break
-      }
+        case 'account.updated': {
+          const account = event.data.object
+          
+          // Update user's Stripe account status
+          await db
+            .update(users)
+            .set({ 
+              stripeAccountEnabled: account.charges_enabled && account.details_submitted,
+            })
+            .where(eq(users.stripeConnectAccountId, account.id))
+          break
+        }
     }
 
     return NextResponse.json({ received: true })
