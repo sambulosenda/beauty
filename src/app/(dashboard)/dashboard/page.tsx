@@ -4,7 +4,6 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import { currentUser } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
-import { DashboardNav } from '@/components/dashboard/nav'
 import { DashboardStats } from '@/components/dashboard/stats'
 
 export default async function DashboardPage() {
@@ -30,10 +29,8 @@ export default async function DashboardPage() {
             <h1 className="text-3xl font-bold tracking-tight">Welcome back, {provider.businessName}</h1>
             <p className="text-gray-500 mt-2">Here's what's happening with your business today.</p>
           </div>
-
+          {/* @ts-expect-error Async Server Component */}
           <DashboardStats providerId={provider.id} />
-
-        
         </div>
       </main>
     </div>

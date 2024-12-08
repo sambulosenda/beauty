@@ -1,120 +1,112 @@
+import { Suspense } from 'react';
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/db";
 import { bookings, services, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { formatCurrency } from "@/lib/utils";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar} from "lucide-react";
+import { and, eq, inArray } from "drizzle-orm";
+import { BookingsList } from "./bookings-list";
+import { BookingsFilter } from "./bookings-filter";
+import { BookingsStats } from "./bookings-stats";
+import { ErrorBoundary } from '@/components/error-boundary';
 
-export default async function BookingsPage() {
-    const { userId } = await auth();
+export default async function BookingsPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}) {
+  const { userId } = await auth();
 
   if (!userId) {
     redirect("/sign-in");
   }
 
-  // Keep existing data fetching
-  const dbUser = await db
-    .select()
-    .from(users)
-    .where(eq(users.clerkId, userId))
-    .then((rows) => rows[0]);
+  const page = typeof searchParams.page === 'string' ? parseInt(searchParams.page, 10) : 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
 
-  if (!dbUser) {
-    return [];
-  }
+  const statusFilter = typeof searchParams.status === 'string' 
+    ? searchParams.status.split(',') 
+    : undefined;
 
-  const userBookings = await db
-    .select({
-      id: bookings.id,
-      startTime: bookings.startTime,
-      status: bookings.status,
-      'service.name': services.name,
-      'service.price': services.price,
-      'provider.name': users.name,
-      'provider.businessName': users.businessName
-    })
-    .from(bookings)
-    .innerJoin(services, eq(bookings.serviceId, services.id))
-    .innerJoin(users, eq(bookings.providerId, users.id))
-    .where(
+  try {
+    // Fetch user data
+    const dbUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, userId))
+      .then((rows) => rows[0]);
+
+    if (!dbUser) {
+      redirect("/onboarding");
+    }
+
+    // Prepare the where clause for bookings query
+    const whereClause = [
       dbUser.role === 'PROVIDER' 
         ? eq(bookings.providerId, dbUser.id)
         : eq(bookings.customerId, dbUser.id)
-    )
-    .orderBy(bookings.startTime);
+    ];
 
-  return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <Button>New Booking</Button>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userBookings.length}</div>
-          </CardContent>
-        </Card>
-        {/* Add more summary cards as needed */}
-      </div>
+    if (statusFilter) {
+      whereClause.push(inArray(bookings.status, statusFilter as Array<"PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED">));
+    }
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Bookings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {userBookings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Calendar className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900">No bookings yet</h3>
-              <p className="text-sm text-gray-500 mt-1">Your upcoming bookings will appear here</p>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <div className="grid grid-cols-6 gap-4 p-4 text-sm font-medium text-gray-500">
-                <div>Date</div>
-                <div>Time</div>
-                <div>Service</div>
-                <div>Provider</div>
-                <div>Status</div>
-                <div className="text-right">Price</div>
-              </div>
-              <div className="divide-y">
-                {userBookings.map((booking) => (
-                  <div key={booking.id} className="grid grid-cols-6 gap-4 p-4 text-sm items-center hover:bg-gray-50">
-                    <div>{format(new Date(booking.startTime), "MMM d, yyyy")}</div>
-                    <div>{format(new Date(booking.startTime), "h:mm a")}</div>
-                    <div className="font-medium text-gray-900">{booking['service.name']}</div>
-                    <div>{booking['provider.businessName'] || booking['provider.name']}</div>
-                    <div>
-                      <Badge variant={
-                        booking.status === "CONFIRMED" ? "outline" :
-                        booking.status === "PENDING" ? "secondary" :
-                        booking.status === "CANCELLED" ? "destructive" : "secondary"
-                      }>
-                        {booking.status}
-                      </Badge>
-                    </div>
-                    <div className="text-right font-medium text-gray-900">
-                      {formatCurrency(parseFloat(booking['service.price']))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
+    // Fetch bookings with pagination and filtering
+    const userBookings = await db
+      .select({
+        id: bookings.id,
+        startTime: bookings.startTime,
+        status: bookings.status,
+        'service.name': services.name,
+        'service.price': services.price,
+        'provider.name': users.name,
+        'provider.businessName': users.businessName
+      })
+      .from(bookings)
+      .innerJoin(services, eq(bookings.serviceId, services.id))
+      .innerJoin(users, eq(bookings.providerId, users.id))
+      .where(and(...whereClause))
+      .orderBy(bookings.startTime)
+      .limit(limit)
+      .offset(offset);
+
+    // Count total bookings for pagination
+    const totalBookings = await db
+      .select({ count: bookings.id })
+      .from(bookings)
+      .where(and(...whereClause))
+      .then((result) => result[0]?.count || 0);
+
+    const totalPages = Math.ceil(Number(totalBookings) / limit);
+
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <BookingsFilter initialStatus={statusFilter} />
+        </div>
+        
+        <ErrorBoundary fallback={<div>Error loading stats. Please try again later.</div>}>
+          <Suspense fallback={<div>Loading stats...</div>}>
+            {/* @ts-expect-error Async Server Component */}
+            <BookingsStats userId={dbUser.id} userRole={dbUser.role} />
+          </Suspense>
+        </ErrorBoundary>
+
+        <ErrorBoundary fallback={<div>Error loading bookings. Please try again later.</div>}>
+          <Suspense fallback={<div>Loading bookings...</div>}>
+            <BookingsList 
+              bookings={userBookings} 
+              currentPage={page} 
+              totalPages={totalPages}
+              statusFilter={statusFilter}
+            />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+    );
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    return <div>An error occurred while fetching your bookings. Please try again later.</div>;
+  }
 }
