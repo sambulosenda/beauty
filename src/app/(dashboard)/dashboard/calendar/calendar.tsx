@@ -1,8 +1,8 @@
-// app/dashboard/calendar/calendar.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Calendar as CalendarIcon } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { CalendarIcon } from 'lucide-react'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import {
   HoverCard,
@@ -10,13 +10,14 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
 import { formatCurrency } from '@/lib/utils'
-import { format } from 'date-fns'
+import { format, isSameDay } from 'date-fns'
+import { Spinner } from '@/components/ui/spinner'
 
 interface Booking {
   id: string
-  startTime: Date
-  endTime: Date
-  status: string
+  startTime: string
+  endTime: string
+  status: 'CONFIRMED' | 'PENDING' | 'CANCELLED'
   service: {
     name: string
     price: string
@@ -27,38 +28,40 @@ interface Booking {
   }
 }
 
+async function fetchBookings(providerId: string): Promise<Booking[]> {
+  const response = await fetch(`/api/bookings?providerId=${providerId}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch bookings')
+  }
+  return response.json()
+}
+
 export function Calendar({ providerId }: { providerId: string }) {
-  const [bookings, setBookings] = useState<Booking[]>([])
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const response = await fetch('/api/bookings')
-        const data = await response.json()
-        setBookings(data)
-      } catch (error) {
-        console.error('Error fetching bookings:', error)
-      }
-    }
+  const { data: bookings, isLoading, error } = useQuery<Booking[], Error>({
+    queryKey: ['bookings', providerId],
+    queryFn: () => fetchBookings(providerId),
+  })
 
-    fetchBookings()
-  }, [providerId])
+  const getDayBookings = useMemo(() => (date: Date) => {
+    if (!bookings) return []
+    return bookings.filter(booking => 
+      isSameDay(new Date(booking.startTime), date)
+    )
+  }, [bookings])
 
-  const getDayBookings = (date: Date) => {
-    return bookings.filter(booking => {
-      const bookingDate = new Date(booking.startTime)
-      return (
-        bookingDate.getDate() === date.getDate() &&
-        bookingDate.getMonth() === date.getMonth() &&
-        bookingDate.getFullYear() === date.getFullYear()
-      )
-    })
+  if (isLoading) {
+    return <Spinner />
+  }
+
+  if (error) {
+    return <div className="text-red-500">Error loading bookings: {error.message}</div>
   }
 
   return (
-    <div className="flex gap-4">
-      <div className="w-full max-w-md">
+    <div className="flex flex-col md:flex-row gap-4">
+      <div className="w-full md:w-auto md:max-w-md">
         <CalendarComponent
           mode="single"
           selected={selectedDate}
@@ -69,6 +72,7 @@ export function Calendar({ providerId }: { providerId: string }) {
           modifiersStyles={{
             booked: { fontWeight: 'bold', textDecoration: 'underline' }
           }}
+          className="rounded-md border"
         />
       </div>
 
@@ -113,8 +117,12 @@ export function Calendar({ providerId }: { providerId: string }) {
               </HoverCardContent>
             </HoverCard>
           ))}
+          {getDayBookings(selectedDate).length === 0 && (
+            <p className="text-gray-500">No bookings for this day</p>
+          )}
         </div>
       </div>
     </div>
   )
 }
+
