@@ -1,82 +1,41 @@
-// components/layout/nav.tsx
 'use client'
 
 import Link from "next/link"
 import { NavbarAuth } from "./navbar-auth"
 import { cn } from "@/lib/utils"
-import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Search, Menu } from "lucide-react"
+import { Search } from 'lucide-react'
 import { useState } from "react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Outfit } from 'next/font/google'
-
-const outfit = Outfit({ 
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-outfit',
-})
-
-const mainNavItems = [
-  {
-    title: "Home",
-    href: "/",
-  },
-  {
-    title: "Services",
-    href: "/services",
-  },
-  {
-    title: "About",
-    href: "/about",
-  },
-  {
-    title: "Contact",
-    href: "/contact",
-  },
-]
+import { DesktopNav } from "./desktop-nav"
+import { MobileNav } from "./mobile-nav"
+import { motion } from "framer-motion"
 
 export default function Navbar() {
-  const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <nav className={cn(
-      "sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60",
-      outfit.variable
-    )}>
+    <motion.nav
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={cn(
+        "sticky top-0 z-50 w-full border-b bg-white shadow-sm",
+        "font-outfit"
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo & Brand */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <span className={cn(
-                "text-2xl font-bold text-rose-600",
-                outfit.className
-              )}>
+              <span className="text-2xl font-bold text-rose-600">
                 BeautyBook
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-6">
-            {mainNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "text-sm font-medium transition-colors hover:text-rose-600",
-                  outfit.className,
-                  pathname === item.href
-                    ? "text-rose-600"
-                    : "text-gray-600"
-                )}
-              >
-                {item.title}
-              </Link>
-            ))}
-          </div>
+          <DesktopNav />
 
           {/* Search & Auth */}
           <div className="flex items-center space-x-4">
@@ -84,11 +43,11 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="hidden md:flex"
+              className="hidden md:flex hover:bg-rose-50"
               onClick={() => setIsOpen(true)}
+              aria-label="Search"
             >
-              <Search className="h-4 w-4" />
-              <span className="sr-only">Search</span>
+              <Search className="h-4 w-4 text-rose-600" />
             </Button>
 
             {/* Desktop Auth */}
@@ -97,42 +56,11 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Menu */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden"
-                >
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <nav className="flex flex-col space-y-4 mt-4">
-                  {mainNavItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "text-sm font-medium transition-colors hover:text-rose-600 p-2 rounded-lg",
-                        pathname === item.href
-                          ? "bg-rose-50 text-rose-600"
-                          : "text-gray-600"
-                      )}
-                    >
-                      {item.title}
-                    </Link>
-                  ))}
-                  <div className="border-t pt-4">
-                    <NavbarAuth />
-                  </div>
-                </nav>
-              </SheetContent>
-            </Sheet>
+            <MobileNav />
           </div>
         </div>
       </div>
-    </nav>
+    </motion.nav>
   )
 }
+
