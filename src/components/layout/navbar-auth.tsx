@@ -88,14 +88,14 @@ export function NavbarAuth() {
             Sign Up
           </Button>
         </Link>
-        <Link href="/business-signup" passHref legacyBehavior>
+        <Link href="/business" passHref legacyBehavior>
           <Button 
             size="sm" 
             variant="default" 
             className="bg-rose-600 hover:bg-rose-700 text-white text-[15px]"
-            as="a"
+          
           >
-            List Your Business
+           For Businesses
           </Button>
         </Link>
       </div>

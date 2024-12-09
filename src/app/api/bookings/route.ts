@@ -1,73 +1,86 @@
-// app/api/bookings/route.ts
-import { NextResponse } from 'next/server'
-import { db } from '@/db'
-import { bookings, users, services } from '@/db/schema'
-import { currentUser } from '@clerk/nextjs/server'
-import { addMinutes, startOfDay, endOfDay } from 'date-fns'
-import { eq, and, gte, lte } from 'drizzle-orm'
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { db } from "@/db";
+import { bookings, services, users } from "@/db/schema";
+import { and, eq, inArray, gte, lt } from "drizzle-orm";
+import { NextResponse } from "next/server";
 import { sendBookingConfirmation, sendProviderNotification } from '@/lib/emails'
+import { addMinutes } from 'date-fns'
 
 export async function GET(request: Request) {
+  const { userId } = await auth();
+  const { searchParams } = new URL(request.url);
+  
+  const page = parseInt(searchParams.get('page') ?? '1', 10);
+  const statusFilter = searchParams.get('status')?.split(',');
+  const date = searchParams.get('date');
+  const providerId = searchParams.get('providerId');
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
   try {
-    const { searchParams } = new URL(request.url)
-    const dateParam = searchParams.get('date')
+    const dbUser = await db
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, userId!))
+      .then((rows) => rows[0]);
 
-    const clerkUser = await currentUser()
-    if (!clerkUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const dbUser = await db.query.users.findFirst({
-      where: eq(users.clerkId, clerkUser.id)
-    })
-
-    if (!dbUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    // If date param exists, filter by date for calendar view
-    if (dateParam) {
-      const date = new Date(dateParam)
-      const dayStart = startOfDay(date)
-      const dayEnd = endOfDay(date)
-
-      const bookingsForDay = await db.query.bookings.findMany({
-        where: and(
-          dbUser.role === 'PROVIDER'
-            ? eq(bookings.providerId, dbUser.id)
-            : eq(bookings.customerId, dbUser.id),
-          gte(bookings.startTime, dayStart),
-          lte(bookings.startTime, dayEnd)
-        ),
-        with: {
-          service: true,
-          customer: true,
-          provider: true,
-        }
-      })
-
-      return NextResponse.json(bookingsForDay)
-    }
-
-    // If no date param, return all bookings
-    const userBookings = await db.query.bookings.findMany({
-      where: dbUser.role === 'PROVIDER'
+    const whereClause = [
+      dbUser.role === 'PROVIDER' 
         ? eq(bookings.providerId, dbUser.id)
-        : eq(bookings.customerId, dbUser.id),
-      with: {
-        service: true,
-        customer: true,
-        provider: true,
-      }
-    })
+        : eq(bookings.customerId, dbUser.id)
+    ];
 
-    return NextResponse.json(userBookings)
+    if (statusFilter) {
+      whereClause.push(inArray(bookings.status, statusFilter as Array<"PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED">));
+    }
+
+    if (date) {
+      const selectedDate = new Date(date);
+      const nextDay = new Date(selectedDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      
+      whereClause.push(gte(bookings.startTime, selectedDate));
+      whereClause.push(lt(bookings.startTime, nextDay));
+    }
+
+    if (providerId) {
+      whereClause.push(eq(bookings.providerId, providerId));
+    }
+
+    const [userBookings, totalBookings] = await Promise.all([
+      db.select({
+        id: bookings.id,
+        startTime: bookings.startTime,
+        status: bookings.status,
+        'service.name': services.name,
+        'service.price': services.price,
+        'provider.name': users.name,
+        'provider.businessName': users.businessName
+      })
+      .from(bookings)
+      .innerJoin(services, eq(bookings.serviceId, services.id))
+      .innerJoin(users, eq(bookings.providerId, users.id))
+      .where(and(...whereClause))
+      .orderBy(bookings.startTime)
+      .limit(limit)
+      .offset(offset),
+      
+      db.select({ count: bookings.id })
+        .from(bookings)
+        .where(and(...whereClause))
+        .then((result) => result[0]?.count || 0)
+    ]);
+
+    return NextResponse.json({
+      bookings: userBookings,
+      totalPages: Math.ceil(Number(totalBookings) / limit),
+      currentPage: page
+    });
   } catch (error) {
-    console.error('Error fetching bookings:', error)
     return NextResponse.json(
       { error: 'Failed to fetch bookings' },
       { status: 500 }
-    )
+    );
   }
 }
 

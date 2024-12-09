@@ -1,8 +1,6 @@
-// app/services/[id]/page.tsx
+'use client'
+
 import { notFound } from 'next/navigation'
-import { db } from '@/db'
-import { services, users } from '@/db/schema'
-import { eq } from 'drizzle-orm'
 import { formatCurrency, formatDuration } from '@/lib/utils'
 import BookingForm from '@/components/bookings/booking-form'
 import { Suspense } from 'react'
@@ -10,43 +8,54 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Clock, DollarSign } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useQuery } from '@tanstack/react-query'
+import { ServiceDetailSkeleton } from '@/components/services/service-detail-skeleton'
 
-interface ServicePageProps {
-  params: { id: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-async function getService(id: string) {
-  const serviceData = await db
-    .select({
-      id: services.id,
-      name: services.name,
-      description: services.description,
-      price: services.price,
-      duration: services.duration,
-      category: services.category,
-      image: services.image,
-      providerId: services.providerId,
-      provider: {
-        id: users.id,
-        name: users.name,
-        businessName: users.businessName,
-        description: users.description
-      }
-    })
-    .from(services)
-    .innerJoin(users, eq(users.id, services.providerId))
-    .where(eq(services.id, id))
-
-  return serviceData[0]
-}
-
-export default async function ServicePage({ params }: ServicePageProps) {
-  const service = await getService(params.id)
-
-  if (!service) {
-    notFound()
+interface Service {
+  id: string
+  name: string
+  description: string | null
+  price: string
+  duration: number
+  category: string
+  image: string | null
+  providerId: string
+  provider: {
+    id: string
+    name: string
+    businessName: string | null
+    description: string | null
+    image?: string
   }
+}
+
+function useService(id: string) {
+  return useQuery({
+    queryKey: ['service', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/services/${id}`)
+      if (!response.ok) {
+        if (response.status === 404) {
+          notFound()
+        }
+        throw new Error('Failed to fetch service')
+      }
+      return response.json() as Promise<Service>
+    }
+  })
+}
+
+export default function ServicePage({ params }: { params: { id: string } }) {
+  const { data: service, isLoading, error } = useService(params.id)
+
+  if (isLoading) {
+    return <ServiceDetailSkeleton />
+  }
+
+  if (error || !service) {
+    return notFound()
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -92,7 +101,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             </CardHeader>
             <CardContent className="flex items-start space-x-4">
               <Avatar className="w-16 h-16">
-                <AvatarImage src={service.provider.image || undefined} alt={service.provider.name} />
+                <AvatarImage src={service.provider.image} alt={service.provider.name} />
                 <AvatarFallback>{service.provider.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
@@ -125,19 +134,4 @@ export default async function ServicePage({ params }: ServicePageProps) {
       </div>
     </div>
   )
-}
-
-export async function generateMetadata({ params }: ServicePageProps) {
-  const service = await getService(params.id)
-
-  if (!service) {
-    return {
-      title: 'Service Not Found',
-      description: 'The requested service could not be found.'
-    }
-  }
-  return {
-    title: `${service.name} | Beauty Services`,
-    description: service.description || `Book ${service.name} service now`
-  }
 }

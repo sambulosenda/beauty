@@ -13,103 +13,54 @@ import {
 import { ClientStatusUpdate } from '@/components/bookings/client-status-update'
 import Link from 'next/link'
 import { Spinner } from '@/components/ui/spinner'
+import type { Booking } from '@/types/bookings';
 
 interface DayBookingsProps {
   date: Date
   providerId: string
 }
 
-type Booking = {
-  id: string
-  startTime: string
-  endTime: string
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-  service: {
-    name: string
-  }
-  customer: {
-    name: string | null
-  }
-}
-
 export function DayBookings({ date, providerId }: DayBookingsProps) {
-  const fetchBookings = useCallback(async () => {
-    const response = await fetch(
-      `/api/bookings?date=${date.toISOString()}&providerId=${providerId}`
-    )
-    if (!response.ok) throw new Error('Failed to fetch bookings')
-    return response.json()
-  }, [date, providerId])
-
-  const { data: bookings, isLoading, error } = useQuery<Booking[], Error>({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['bookings', date.toISOString(), providerId],
-    queryFn: fetchBookings,
-  })
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/bookings?date=${date.toISOString()}&providerId=${providerId}`
+      );
+      if (!response.ok) throw new Error('Failed to fetch bookings');
+      const result = await response.json();
+      console.log('API Response:', result);
+      return result;
+    },
+  });
 
-  const formattedDate = useMemo(() => format(date, 'MMMM d, yyyy'), [date])
+  if (isLoading) return <div>Loading bookings...</div>;
+  if (error) return <div>Error loading bookings: {(error as Error).message}</div>;
+  
+  const bookings = data?.bookings ?? [];
+  console.log('Bookings:', bookings);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="text-red-500" role="alert">
-        Error loading bookings: {error.message}
-      </div>
-    )
-  }
-
-  if (!bookings || bookings.length === 0) {
-    return (
-      <p className="text-gray-500" role="status">
-        No bookings for {formattedDate}
-      </p>
-    )
+  if (bookings.length === 0) {
+    return <div>No bookings for {format(date, 'MMMM d, yyyy')}</div>;
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="sr-only">Bookings for {formattedDate}</h2>
-      {bookings.map((booking) => (
+      {bookings.map((booking: Booking) => (
         <Card key={booking.id}>
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle>{booking.service.name}</CardTitle>
+                <CardTitle>{booking['service.name']}</CardTitle>
                 <CardDescription>
-                  {format(new Date(booking.startTime), 'h:mm a')} - 
-                  {format(new Date(booking.endTime), 'h:mm a')}
+                  {format(new Date(booking.startTime), 'h:mm a')}
                 </CardDescription>
               </div>
-              <Link 
-                href={`/bookings/${booking.id}`}
-                className="text-sm text-blue-600 hover:text-blue-800"
-                aria-label={`View details for ${booking.service.name} booking`}
-              >
-                View Details
-              </Link>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-gray-500">Customer</p>
-                <p>{booking.customer.name || 'Anonymous'}</p>
-              </div>
-              <ClientStatusUpdate 
-                bookingId={booking.id}
-                currentStatus={booking.status}
-              />
-            </div>
-          </CardContent>
         </Card>
       ))}
     </div>
-  )
+  );
 }
 

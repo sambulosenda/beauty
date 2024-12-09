@@ -8,16 +8,7 @@ import { Calendar, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-reac
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-
-interface Booking {
-  id: string;
-  startTime: Date;
-  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
-  'service.name': string;
-  'service.price': string;
-  'provider.name': string | null;
-  'provider.businessName': string | null;
-}
+import type { Booking } from '@/types/bookings';
 
 interface BookingsListProps {
   bookings: Booking[];
@@ -95,7 +86,7 @@ export function BookingsList({ bookings: initialBookings, currentPage, totalPage
                     <div className="text-right">
                       <div className="font-medium text-gray-900 md:hidden">Price</div>
                       <div className="font-medium text-gray-900">
-                        {formatCurrency(parseFloat(booking['service.price']))}
+                        {formatCurrency(booking['service.price'])}
                       </div>
                     </div>
                   </div>

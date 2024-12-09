@@ -28,8 +28,8 @@ export default function Navbar() {
           {/* Logo & Brand */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-rose-600">
-                BeautyBook
+              <span className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-rose-600 text-transparent bg-clip-text">
+                AfroGlow
               </span>
             </Link>
           </div>
@@ -43,11 +43,11 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="hidden md:flex hover:bg-rose-50"
+              className="hidden md:flex hover:bg-amber-50"
               onClick={() => setIsOpen(true)}
               aria-label="Search"
             >
-              <Search className="h-4 w-4 text-rose-600" />
+              <Search className="h-4 w-4 text-amber-600" />
             </Button>
 
             {/* Desktop Auth */}
