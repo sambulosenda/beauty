@@ -1,7 +1,7 @@
 // app/page.tsx
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Clock, Shield, CheckCircle, Star, Users } from "lucide-react";
+import { ArrowRight, Sparkles, Clock, Shield, CheckCircle, Star, Users, Search, MapPin } from "lucide-react";
 import Image from "next/image";
 
 export default function Home() {
@@ -9,58 +9,82 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-b from-amber-50 to-rose-50 overflow-hidden border-b border-gray-100">
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 right-0 h-96 w-96 -translate-y-1/2 translate-x-1/2 rounded-full bg-amber-100/20 blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 h-96 w-96 translate-y-1/2 -translate-x-1/2 rounded-full bg-rose-50/20 blur-3xl"></div>
-          </div>
-          
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center space-y-8 text-center">
-              <div className="inline-block rounded-full bg-amber-50 px-4 py-1.5">
-                <span className="text-sm font-medium text-amber-600">
-                  Celebrating Black Beauty & Wellness
-                </span>
-              </div>
-              
-              <div className="space-y-4">
-                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none max-w-3xl mx-auto">
-                  Your Crown Deserves <span className="text-amber-600 inline-block">Royal Treatment</span>
-                </h1>
-                <p className="mx-auto max-w-[700px] text-gray-600 md:text-xl dark:text-gray-400 leading-relaxed">
-                  Connect with skilled Black beauty professionals specializing in natural hair, protective styles, skincare, and holistic wellness services.
-                </p>
-              </div>
+        <section className="relative w-full min-h-screen bg-gradient-to-r from-slate-800 to-slate-600 overflow-hidden">
+          <div className="container px-4 md:px-6 h-full">
+            <div className="grid lg:grid-cols-2 gap-12 items-center min-h-screen">
+              {/* Left Content */}
+              <div className="flex flex-col space-y-8 py-20">
+                {/* Brand Badge */}
+                <div className="inline-block rounded-full bg-amber-50/10 px-4 py-1.5 w-fit">
+                  <span className="text-sm font-medium text-amber-100">
+                    ✨ Welcome to AfroGlow
+                  </span>
+                </div>
 
-              <div className="flex flex-col items-center space-y-4">
-                <div className="flex items-center space-x-8 text-sm text-gray-600">
+                {/* Main Headline */}
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+                  Your Gateway to African Beauty & Wellness Excellence
+                </h1>
+                
+                {/* Subheadline */}
+                <p className="text-lg md:text-xl text-gray-200 max-w-[600px]">
+                  AfroGlow connects you with exceptional African beauty professionals. Book your perfect hair, makeup, skincare, and wellness services seamlessly.
+                </p>
+
+                {/* Trust Indicators */}
+                <div className="flex flex-wrap gap-4 text-sm text-gray-200">
                   <div className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-amber-500 mr-2" />
-                    <span>500+ Black-Owned Businesses</span>
+                    <CheckCircle className="h-5 w-5 text-amber-400 mr-2" />
+                    <span>Verified Professionals</span>
                   </div>
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-amber-400 mr-2" />
-                    <span>4.9/5 Rating</span>
+                    <span>Top-Rated Services</span>
                   </div>
                   <div className="flex items-center">
-                    <Users className="h-5 w-5 text-amber-500 mr-2" />
-                    <span>10k+ Happy Clients</span>
+                    <Shield className="h-5 w-5 text-amber-400 mr-2" />
+                    <span>Secure Booking</span>
                   </div>
                 </div>
+
+                {/* Search Box */}
+                <div className="bg-white p-2 rounded-lg flex flex-col sm:flex-row gap-2 max-w-[800px]">
+                  <div className="flex-1 flex items-center px-4 border-b sm:border-b-0 sm:border-r border-gray-200">
+                    <Search className="h-5 w-5 text-gray-400 mr-2" />
+                    <input 
+                      type="text"
+                      placeholder="Search Services, Salons, Stylists"
+                      className="w-full py-2 focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex-1 flex items-center px-4">
+                    <MapPin className="h-5 w-5 text-gray-400 mr-2" />
+                    <input 
+                      type="text"
+                      placeholder="What location?"
+                      className="w-full py-2 focus:outline-none"
+                    />
+                  </div>
+                  <Button className="bg-amber-600 hover:bg-amber-700 text-white px-8">
+                    Search
+                  </Button>
+                </div>
+
+                <Button className="bg-amber-600 hover:bg-amber-700 text-white w-fit px-8 py-3">
+                  Find Your Perfect Stylist
+                </Button>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-                <Link href="/services" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full bg-amber-600 hover:bg-amber-700">
-                    Find Your Stylist
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <Link href="/business-signup" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className="w-full">
-                    List Your Business
-                  </Button>
-                </Link>
+              {/* Right Image */}
+              <div className="relative hidden lg:block h-full">
+                <Image
+                  src="/images/home-banner.png" // Replace with your image path
+                  alt="Woman smiling with phone and coffee"
+                  fill
+                  className="object-cover object-center"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
               </div>
             </div>
           </div>
