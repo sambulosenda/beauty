@@ -1,8 +1,9 @@
 export interface Provider {
-    id: string;
-    name: string | null;
-    businessName: string | null;
-    description: string | null;
+  id: string
+  name: string
+  businessName: string | null
+  description: string | null
+  image?: string
   }
   
   export interface Service {
@@ -34,3 +35,14 @@ export interface Provider {
       businessName: string | null;
     };
   }
+
+  export interface BookingFormProps {
+    service: {
+      id: string
+      name: string
+      price: string
+      duration: number
+      providerId: string
+    }
+  }
+  

@@ -55,7 +55,7 @@ export default async function BookingsPage() {
   const userBookings = await getBookings(userId)
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">My Bookings</h1>
 
       {userBookings.length === 0 ? (

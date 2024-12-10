@@ -14,16 +14,8 @@ import { CalendarIcon, Clock, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PaymentWrapper } from '@/components/payments/payment-wrapper'
+import { BookingFormProps } from '../../../types'
 
-interface BookingFormProps {
-  service: {
-    id: string
-    name: string
-    price: string
-    duration: number
-    providerId: string
-  }
-}
 
 export default function BookingForm({ service }: BookingFormProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)

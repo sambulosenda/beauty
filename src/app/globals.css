@@ -74,3 +74,15 @@
       @apply bg-background text-foreground;
     }
   }
+
+  html {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  body {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+  }

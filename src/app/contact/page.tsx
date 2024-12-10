@@ -14,22 +14,21 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-amber-500 to-rose-500">
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+      <div className="bg-amber-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
           <h1 className="text-4xl font-bold text-white sm:text-5xl">
             Connect With Us
           </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-xl text-white/90">
+          <p className="mt-6 max-w-2xl mx-auto text-xl text-white">
             We're here to support our community of beauty professionals and clients.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Contact Form */}
-          <Card>
+          <Card className="border-0 shadow-none">
             <CardHeader>
               <CardTitle>Send us a Message</CardTitle>
             </CardHeader>
@@ -94,7 +93,7 @@ export default function ContactPage() {
 
           {/* Contact Information */}
           <div className="space-y-6">
-            <Card>
+            <Card className="border-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
                   <Mail className="h-6 w-6 text-amber-600 mt-1" />
@@ -111,7 +110,7 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
                   <Phone className="h-6 w-6 text-amber-600 mt-1" />
@@ -128,7 +127,7 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
                   <MapPin className="h-6 w-6 text-amber-600 mt-1" />
@@ -145,7 +144,7 @@ export default function ContactPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-0 shadow-none">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
                   <Clock className="h-6 w-6 text-amber-600 mt-1" />
@@ -170,3 +169,4 @@ export default function ContactPage() {
     </div>
   )
 }
+

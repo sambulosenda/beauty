@@ -13,13 +13,12 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-pink-500 to-rose-500">
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+      <div className="bg-rose-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
           <h1 className="text-4xl font-bold text-white sm:text-5xl md:text-6xl">
             Transforming Beauty Services
           </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-xl text-white/90">
+          <p className="mt-6 max-w-2xl mx-auto text-xl text-white">
             Connecting talented beauty professionals with clients through seamless booking experiences.
           </p>
         </div>
@@ -44,7 +43,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold text-gray-900">Our Values</h2>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <Card>
+            <Card className="border-0 shadow-none">
               <CardContent className="p-6 text-center">
                 <div className="mx-auto w-12 h-12 flex items-center justify-center rounded-full bg-rose-100 mb-4">
                   <Heart className="h-6 w-6 text-rose-600" />
@@ -55,7 +54,7 @@ export default function AboutPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-0 shadow-none">
               <CardContent className="p-6 text-center">
                 <div className="mx-auto w-12 h-12 flex items-center justify-center rounded-full bg-rose-100 mb-4">
                   <Shield className="h-6 w-6 text-rose-600" />
@@ -66,7 +65,7 @@ export default function AboutPage() {
                 </p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="border-0 shadow-none">
               <CardContent className="p-6 text-center">
                 <div className="mx-auto w-12 h-12 flex items-center justify-center rounded-full bg-rose-100 mb-4">
                   <Clock className="h-6 w-6 text-rose-600" />
@@ -134,3 +133,4 @@ export default function AboutPage() {
     </div>
   )
 }
+

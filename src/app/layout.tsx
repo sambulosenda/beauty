@@ -4,10 +4,10 @@ import './globals.css'
 import Navbar from '@/components/layout/nav'
 import { Outfit } from 'next/font/google'
 
-// export const metadata = {
-//   title: 'Beauty Booking',
-//   description: 'Book beauty services with top professionals',
-// }
+const metadata = {
+  title: 'Beauty Booking',
+  description: 'Book beauty services with top professionals',
+}
 
 const outfit = Outfit({
   subsets: ['latin'],

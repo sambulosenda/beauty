@@ -62,7 +62,7 @@ export function ServicesList({ initialServices }: ServicesListProps) {
   }, [initialServices, selectedCategory, searchQuery, sortBy])
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto px-4">
       <div className="space-y-8">
         {/* Search and Filter Section */}
         <div className="bg-white rounded-xl shadow-sm p-6">

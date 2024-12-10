@@ -3,17 +3,36 @@ import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { services, users } from '@/db/schema'
 import { currentUser } from '@clerk/nextjs/server'
-import { eq } from 'drizzle-orm'
+import { eq, like, or, and } from 'drizzle-orm'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const allServices = await db.query.services.findMany({
+    const { searchParams } = new URL(request.url)
+    const search = searchParams.get('search')
+    const location = searchParams.get('location')
+
+    let query = db.query.services.findMany({
       with: {
-        provider: true
-      }
+        provider: {
+          columns: {
+            id: true,
+            name: true,
+            businessName: true,
+            address: true
+          }
+        }
+      },
+      where: search ? 
+        or(
+          like(services.name, `%${search}%`),
+          like(services.description, `%${search}%`)
+        ) : undefined
     })
+
+    const allServices = await query
     return NextResponse.json(allServices)
   } catch (error) {
+    console.error('Error fetching services:', error)
     return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 })
   }
 }

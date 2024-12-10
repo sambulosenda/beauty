@@ -3,120 +3,46 @@ import { mainNavItems } from "@/lib/nav-items"
 
 export function Footer() {
   return (
-    <footer className="bg-white border-t">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Column */}
-          <div className="space-y-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-rose-600 text-transparent bg-clip-text">
-                AfroGlow
-              </span>
-            </Link>
-            <p className="text-sm text-gray-600">
-              Connecting talented beauty professionals with clients through seamless booking experiences.
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              {mainNavItems.map((item) => (
-                <li key={item.href}>
-                  <Link 
-                    href={item.href}
-                    className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
-                  >
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h3 className="font-semibold mb-4">Services</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link 
-                  href="/services?category=Hair"
-                  className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
-                >
-                  Hair Styling
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/services?category=Nails"
-                  className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
-                >
-                  Nail Care
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/services?category=Facial"
-                  className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
-                >
-                  Facial Treatments
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/services?category=Body"
-                  className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
-                >
-                  Body Treatments
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="font-semibold mb-4">Contact</h3>
-            <ul className="space-y-2">
-              <li className="text-sm text-gray-600">
-                1234 Cultural Way
-              </li>
-              <li className="text-sm text-gray-600">
-                Atlanta, GA 30303
-              </li>
-              <li className="text-sm text-gray-600">
-                hello@afroglow.com
-              </li>
-              <li className="text-sm text-gray-600">
-                +1 (888) 234-5678
-              </li>
-            </ul>
-          </div>
+    <footer className="bg-gray-900 py-12 text-white">
+    <div className="container mx-auto px-4">
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <h3 className="text-lg font-semibold">About Us</h3>
+          <ul className="mt-4 space-y-2">
+            <li><Link href="/about" className="text-gray-400 hover:text-white">Our Story</Link></li>
+            <li><Link href="/team" className="text-gray-400 hover:text-white">Team</Link></li>
+            <li><Link href="/careers" className="text-gray-400 hover:text-white">Careers</Link></li>
+          </ul>
         </div>
-
-        {/* Bottom Bar */}
-        <div className="border-t mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-gray-600">
-              © {new Date().getFullYear()} AfroGlow. All rights reserved.
-            </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link 
-                href="/privacy" 
-                className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
-              >
-                Privacy Policy
-              </Link>
-              <Link 
-                href="/terms" 
-                className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
-              >
-                Terms of Service
-              </Link>
-            </div>
-          </div>
+        <div>
+          <h3 className="text-lg font-semibold">For Clients</h3>
+          <ul className="mt-4 space-y-2">
+            <li><Link href="/how-it-works" className="text-gray-400 hover:text-white">How It Works</Link></li>
+            <li><Link href="/safety" className="text-gray-400 hover:text-white">Safety</Link></li>
+            <li><Link href="/faq" className="text-gray-400 hover:text-white">FAQ</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold">For Professionals</h3>
+          <ul className="mt-4 space-y-2">
+            <li><Link href="/join" className="text-gray-400 hover:text-white">Join as Pro</Link></li>
+            <li><Link href="/resources" className="text-gray-400 hover:text-white">Resources</Link></li>
+            <li><Link href="/pro-faq" className="text-gray-400 hover:text-white">Pro FAQ</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold">Connect</h3>
+          <ul className="mt-4 space-y-2">
+            <li><Link href="/contact" className="text-gray-400 hover:text-white">Contact Us</Link></li>
+            <li><Link href="/support" className="text-gray-400 hover:text-white">Support</Link></li>
+            <li><Link href="/blog" className="text-gray-400 hover:text-white">Blog</Link></li>
+          </ul>
         </div>
       </div>
-    </footer>
+      <div className="mt-12 border-t border-gray-800 pt-8 text-center">
+        <p>&copy; {new Date().getFullYear()} BeautyBook. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
   )
 } 

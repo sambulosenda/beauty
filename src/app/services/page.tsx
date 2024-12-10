@@ -16,7 +16,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ServicesPage() {
+export default async function ServicesPage({
+  searchParams,
+}: {
+  searchParams: { search?: string; location?: string }
+}) {
   return (
     <div className="min-h-screen">
       <section className="relative bg-gradient-to-r from-rose-100 to-amber-100">
@@ -35,7 +39,10 @@ export default function ServicesPage() {
       </section>
 
       <Suspense fallback={<ServicesPageSkeleton />}>
-        <ServicesSection />
+        <ServicesSection 
+          initialSearch={searchParams.search}
+          initialLocation={searchParams.location}
+        />
       </Suspense>
     </div>
   );

@@ -10,24 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useQuery } from '@tanstack/react-query'
 import { ServiceDetailSkeleton } from '@/components/services/service-detail-skeleton'
-
-interface Service {
-  id: string
-  name: string
-  description: string | null
-  price: string
-  duration: number
-  category: string
-  image: string | null
-  providerId: string
-  provider: {
-    id: string
-    name: string
-    businessName: string | null
-    description: string | null
-    image?: string
-  }
-}
+import { Service } from '../../../../types'
 
 function useService(id: string) {
   return useQuery({
@@ -59,31 +42,31 @@ export default function ServicePage({ params }: { params: { id: string } }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        {/* Left Column */}
         <div className="lg:col-span-2 space-y-8">
-          <Card>
-            <CardContent className="p-0">
-              {service.image && (
-                <img
-                  src={service.image}
-                  alt={service.name}
-                  className="w-full h-[400px] object-cover rounded-t-lg"
-                />
-              )}
-            </CardContent>
-            <CardHeader>
+          {/* Service Details */}
+          <div className="bg-white">
+            {service.image && (
+              <img
+                src={service.image}
+                alt={service.name}
+                className="w-full h-[400px] object-cover"
+              />
+            )}
+            <div className="mt-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-3xl">{service.name}</CardTitle>
-                  <CardDescription className="mt-2">{service.description}</CardDescription>
+                  <h1 className="text-3xl font-medium text-gray-900">{service.name}</h1>
+                  <p className="mt-2 text-gray-600">{service.description}</p>
                 </div>
-                <Badge variant="secondary">{service.category}</Badge>
+                <Badge className="bg-gray-100 text-gray-900 hover:bg-gray-200">
+                  {service.category}
+                </Badge>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
+              <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-6">
                 <div className="flex items-center space-x-2">
-                  <DollarSign className="text-rose-600" />
-                  <span className="text-2xl font-semibold text-rose-600">
+                  <DollarSign className="text-gray-900" />
+                  <span className="text-2xl font-medium text-gray-900">
                     {formatCurrency(parseFloat(service.price))}
                   </span>
                 </div>
@@ -92,20 +75,19 @@ export default function ServicePage({ params }: { params: { id: string } }) {
                   <span>{formatDuration(service.duration)}</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>About the Provider</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-start space-x-4">
-              <Avatar className="w-16 h-16">
+          {/* Provider Details */}
+          <div className="bg-white border-t border-gray-100 pt-8">
+            <h2 className="text-2xl font-medium text-gray-900">About the Provider</h2>
+            <div className="mt-6 flex items-start space-x-4">
+              <Avatar className="w-16 h-16 border border-gray-200">
                 <AvatarImage src={service.provider.image} alt={service.provider.name} />
                 <AvatarFallback>{service.provider.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="text-xl font-semibold">
+                <h3 className="text-xl font-medium text-gray-900">
                   {service.provider.businessName || service.provider.name}
                 </h3>
                 {service.provider.description && (
@@ -114,22 +96,19 @@ export default function ServicePage({ params }: { params: { id: string } }) {
                   </p>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
+        {/* Right Column - Booking Form */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-8">
-            <CardHeader>
-              <CardTitle>Book this Service</CardTitle>
-              <CardDescription>Select a date and time to book your appointment</CardDescription>
-            </CardHeader>
-            <CardContent>
+          <div className="bg-white border border-gray-100 p-6">
+            <div className="mt-1">
               <Suspense fallback={<div>Loading booking form...</div>}>
                 <BookingForm service={service} />
               </Suspense>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
