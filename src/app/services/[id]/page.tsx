@@ -11,25 +11,36 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useQuery } from '@tanstack/react-query'
 import { ServiceDetailSkeleton } from '@/components/services/service-detail-skeleton'
 import { Service } from '../../../../types'
+import { format, parseISO } from 'date-fns'
 
 function useService(id: string) {
   return useQuery({
     queryKey: ['service', id],
     queryFn: async () => {
-      const response = await fetch(`/api/services/${id}`)
-      if (!response.ok) {
-        if (response.status === 404) {
-          notFound()
-        }
-        throw new Error('Failed to fetch service')
-      }
-      return response.json() as Promise<Service>
+      const serviceResponse = await fetch(`/api/services/${id}`);
+      const service = await serviceResponse.json();
+      
+      // Fetch availability using providerId from service
+      const availabilityResponse = await fetch(`/api/availability/${service.providerId}`);
+      const availability = await availabilityResponse.json();
+      
+      console.log('Service:', service);
+      console.log('Availability:', availability);
+
+      return {
+        ...service,
+        availableDays: availability
+          .filter((a: any) => a.isAvailable)
+          .map((a: any) => a.dayOfWeek)
+      };
     }
-  })
+  });
 }
 
 export default function ServicePage({ params }: { params: { id: string } }) {
-  const { data: service, isLoading, error } = useService(params.id)
+  const { data: service, isLoading, error } = useService(params.id);
+
+  console.log('Rendered service:', service);
 
   if (isLoading) {
     return <ServiceDetailSkeleton />
@@ -75,27 +86,26 @@ export default function ServicePage({ params }: { params: { id: string } }) {
                   <span>{formatDuration(service.duration)}</span>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Provider Details */}
-          <div className="bg-white border-t border-gray-100 pt-8">
-            <h2 className="text-2xl font-medium text-gray-900">About the Provider</h2>
-            <div className="mt-6 flex items-start space-x-4">
-              <Avatar className="w-16 h-16 border border-gray-200">
-                <AvatarImage src={service.provider.image} alt={service.provider.name} />
-                <AvatarFallback>{service.provider.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="text-xl font-medium text-gray-900">
-                  {service.provider.businessName || service.provider.name}
-                </h3>
-                {service.provider.description && (
-                  <p className="text-gray-600 mt-2">
-                    {service.provider.description}
-                  </p>
-                )}
-              </div>
+              {service?.availableDays && service.availableDays.length > 0 ? (
+                <div className="mt-6 border-t border-gray-100 pt-6">
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">Available Days</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {service.availableDays.map((day: string) => (
+                      <Badge 
+                        key={day} 
+                        variant="secondary"
+                        className="px-3 py-1"
+                      >
+                        {day.charAt(0) + day.slice(1).toLowerCase()}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-6 border-t border-gray-100 pt-6">
+                  <p className="text-gray-500">No availability set</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

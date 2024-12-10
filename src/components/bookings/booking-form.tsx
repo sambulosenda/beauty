@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { addDays, setHours, setMinutes, format, parse, isSameDay } from 'date-fns'
@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PaymentWrapper } from '@/components/payments/payment-wrapper'
 import { BookingFormProps } from '../../../types'
+import { CustomBookingCalendar } from './custom-booking-calendar'
 
 
 export default function BookingForm({ service }: BookingFormProps) {
@@ -26,6 +27,21 @@ export default function BookingForm({ service }: BookingFormProps) {
   const router = useRouter()
   const [showPayment, setShowPayment] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
+  const [bookedDates, setBookedDates] = useState<Date[]>([])
+
+  useEffect(() => {
+    async function fetchBookedDates() {
+      try {
+        const response = await fetch(`/api/bookings/check?providerId=${service.providerId}`)
+        const data = await response.json()
+        setBookedDates(data.map((booking: any) => new Date(booking.startTime)))
+      } catch (error) {
+        console.error('Error fetching booked dates:', error)
+      }
+    }
+
+    fetchBookedDates()
+  }, [service.providerId])
 
   const handleDateChange = (date: Date | null) => {
     setError(null)
@@ -65,7 +81,7 @@ export default function BookingForm({ service }: BookingFormProps) {
 
     try {
       const startTime = parse(selectedTime, 'HH:mm', selectedDate)
-      
+
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -99,20 +115,7 @@ export default function BookingForm({ service }: BookingFormProps) {
     return slots
   }
 
-  const steps = [
-    {
-      title: 'Select Date',
-      icon: CalendarIcon,
-      isCompleted: !!selectedDate,
-      isActive: !selectedDate,
-    },
-    {
-      title: 'Select Time',
-      icon: Clock,
-      isCompleted: !!selectedTime,
-      isActive: !!selectedDate && !selectedTime,
-    },
-  ]
+ 
 
   if (!isSignedIn) {
     return (
@@ -127,7 +130,7 @@ export default function BookingForm({ service }: BookingFormProps) {
 
   if (showPayment && bookingId) {
     return (
-      <PaymentWrapper 
+      <PaymentWrapper
         bookingId={bookingId}
         amount={parseFloat(service.price)}
       />
@@ -139,41 +142,20 @@ export default function BookingForm({ service }: BookingFormProps) {
       <div className="p-6">
         <h2 className="text-2xl font-semibold mb-2">Book this Service</h2>
         <p className="text-gray-600 mb-6">Select a date and time to book your appointment</p>
-        
-        <div className="flex gap-8 mb-6">
-          {steps.map((step, index) => (
-            <div
-              key={step.title}
-              className={cn(
-                "flex items-center gap-2",
-                (step.isActive || step.isCompleted) ? "text-primary" : "text-gray-400"
-              )}
-            >
-              <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-current">
-                {step.isCompleted ? (
-                  <CheckCircle2 className="w-5 h-5" />
-                ) : (
-                  <step.icon className="w-5 h-5" />
-                )}
-              </div>
-              <span className="font-medium">{step.title}</span>
-            </div>
-          ))}
-        </div>
+
+      
 
         <div className="space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <Calendar
-              mode="single"
-              selected={selectedDate as Date}
-              onSelect={(date: Date | undefined) => handleDateChange(date || null)}
-              disabled={(date) =>
-                date < new Date() || date > addDays(new Date(), 30)
-              }
-              className="rounded-md border"
+            <CustomBookingCalendar
+              selectedDate={selectedDate}
+              onDateSelect={handleDateChange}
+              bookedDates={[]} // You can pass booked dates from your availability check
+              minDate={new Date()}
+              maxDate={addDays(new Date(), 30)}
             />
           </motion.div>
 
@@ -203,7 +185,8 @@ export default function BookingForm({ service }: BookingFormProps) {
                       >
                         {format(parse(time, 'HH:mm', new Date()), 'h:mm a')}
                       </Button>
-                    )}
+                    )
+                  }
                   )}
                 </div>
               </motion.div>

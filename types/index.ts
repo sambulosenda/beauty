@@ -16,6 +16,7 @@ export interface Provider {
     image: string | null;
     providerId: string;
     provider: Provider;
+    availableDays: string[];
   }
 
   export interface Booking {
