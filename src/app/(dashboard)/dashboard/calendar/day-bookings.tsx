@@ -1,18 +1,14 @@
 'use client'
 
-import { useCallback, useMemo } from 'react'
 import { format } from 'date-fns'
 import { useQuery } from '@tanstack/react-query'
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { ClientStatusUpdate } from '@/components/bookings/client-status-update'
-import Link from 'next/link'
-import { Spinner } from '@/components/ui/spinner'
+
 import type { Booking } from '@/types/bookings';
 
 interface DayBookingsProps {

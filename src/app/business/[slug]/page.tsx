@@ -7,18 +7,6 @@ import { MapPin, Star, Phone, Mail } from 'lucide-react'
 import { ServiceList } from '@/components/services/service-list'
 import { Separator } from '@/components/ui/separator'
 
-interface Business {
-  id: string
-  name: string | null
-  businessName: string | null
-  description: string | null
-  logo: string | null
-  role: string
-  address: string | null
-  phone: string | null
-  email: string | null
-}
-
 export default async function BusinessPage({ params }: { params: { slug: string } }) {
   const business = await db.query.users.findFirst({
     where: eq(users.slug, params.slug),

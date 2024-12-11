@@ -1,13 +1,11 @@
 'use client'
 
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
-import Link from "next/link";
 import type { Booking } from '@/types/bookings';
 
 interface BookingsListProps {

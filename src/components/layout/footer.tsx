@@ -1,48 +1,105 @@
+'use client'
+
 import Link from "next/link"
-import { mainNavItems } from "@/lib/nav-items"
+import { motion } from "framer-motion"
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 py-12 text-white">
-    <div className="container mx-auto px-4">
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <h3 className="text-lg font-semibold">About Us</h3>
-          <ul className="mt-4 space-y-2">
-            <li><Link href="/about" className="text-gray-400 hover:text-white">Our Story</Link></li>
-            <li><Link href="/team" className="text-gray-400 hover:text-white">Team</Link></li>
-            <li><Link href="/careers" className="text-gray-400 hover:text-white">Careers</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold">For Clients</h3>
-          <ul className="mt-4 space-y-2">
-            <li><Link href="/how-it-works" className="text-gray-400 hover:text-white">How It Works</Link></li>
-            <li><Link href="/safety" className="text-gray-400 hover:text-white">Safety</Link></li>
-            <li><Link href="/faq" className="text-gray-400 hover:text-white">FAQ</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold">For Professionals</h3>
-          <ul className="mt-4 space-y-2">
-            <li><Link href="/join" className="text-gray-400 hover:text-white">Join as Pro</Link></li>
-            <li><Link href="/resources" className="text-gray-400 hover:text-white">Resources</Link></li>
-            <li><Link href="/pro-faq" className="text-gray-400 hover:text-white">Pro FAQ</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold">Connect</h3>
-          <ul className="mt-4 space-y-2">
-            <li><Link href="/contact" className="text-gray-400 hover:text-white">Contact Us</Link></li>
-            <li><Link href="/support" className="text-gray-400 hover:text-white">Support</Link></li>
-            <li><Link href="/blog" className="text-gray-400 hover:text-white">Blog</Link></li>
-          </ul>
+    <motion.footer 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="border-t border-gray-100 bg-white/80 backdrop-blur-sm"
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="py-12">
+          {/* Footer Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Brand Section */}
+            <div className="space-y-4">
+              <Link href="/" className="inline-block">
+                <span className="text-2xl font-bold bg-gradient-to-r from-amber-600 via-rose-600 to-rose-600 text-transparent bg-clip-text">
+                  AfroGlow
+                </span>
+              </Link>
+              <p className="text-gray-500 text-sm">
+                Connecting beauty professionals with clients. Book your next appointment with ease.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">Quick Links</h3>
+              <ul className="space-y-2">
+                {['Services', 'About', 'Contact'].map((item) => (
+                  <li key={item}>
+                    <Link 
+                      href={`/${item.toLowerCase()}`}
+                      className="text-gray-500 hover:text-rose-600 transition-colors text-sm"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* For Businesses */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">For Businesses</h3>
+              <ul className="space-y-2">
+                {['Join as Provider', 'Business Features', 'Pricing'].map((item) => (
+                  <li key={item}>
+                    <Link 
+                      href={`/business${item === 'Join as Provider' ? '/register' : ''}`}
+                      className="text-gray-500 hover:text-rose-600 transition-colors text-sm"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">Legal</h3>
+              <ul className="space-y-2">
+                {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (
+                  <li key={item}>
+                    <Link 
+                      href={`/legal/${item.toLowerCase().replace(/ /g, '-')}`}
+                      className="text-gray-500 hover:text-rose-600 transition-colors text-sm"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-gray-100 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-sm text-gray-500">
+              © {new Date().getFullYear()} AfroGlow. All rights reserved.
+            </p>
+            <div className="flex space-x-6 mt-4 md:mt-0">
+              {['Twitter', 'Instagram', 'Facebook'].map((social) => (
+                <Link 
+                  key={social}
+                  href={`https://${social.toLowerCase()}.com`}
+                  className="text-gray-400 hover:text-rose-600 transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {social}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
-      <div className="mt-12 border-t border-gray-800 pt-8 text-center">
-        <p>&copy; {new Date().getFullYear()} BeautyBook. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
+    </motion.footer>
   )
 } 

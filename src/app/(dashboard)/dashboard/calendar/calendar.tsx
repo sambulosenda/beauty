@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { CalendarIcon } from 'lucide-react'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import {
   HoverCard,

@@ -1,53 +1,51 @@
-'use client'
+"use client";
 
-import { notFound } from 'next/navigation'
-import { formatCurrency, formatDuration } from '@/lib/utils'
-import BookingForm from '@/components/bookings/booking-form'
-import { Suspense } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Clock, DollarSign } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useQuery } from '@tanstack/react-query'
-import { ServiceDetailSkeleton } from '@/components/services/service-detail-skeleton'
-import { Service } from '../../../../types'
-import { format, parseISO } from 'date-fns'
+import { notFound } from "next/navigation";
+import { formatCurrency, formatDuration } from "@/lib/utils";
+import BookingForm from "@/components/bookings/booking-form";
+import { Suspense } from "react";
+import { Clock, DollarSign } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { ServiceDetailSkeleton } from "@/components/services/service-detail-skeleton";
 
 function useService(id: string) {
   return useQuery({
-    queryKey: ['service', id],
+    queryKey: ["service", id],
     queryFn: async () => {
       const serviceResponse = await fetch(`/api/services/${id}`);
       const service = await serviceResponse.json();
-      
+
       // Fetch availability using providerId from service
-      const availabilityResponse = await fetch(`/api/availability/${service.providerId}`);
+      const availabilityResponse = await fetch(
+        `/api/availability/${service.providerId}`
+      );
       const availability = await availabilityResponse.json();
-      
-      console.log('Service:', service);
-      console.log('Availability:', availability);
+
+      console.log("Service:", service);
+      console.log("Availability:", availability);
 
       return {
         ...service,
         availableDays: availability
           .filter((a: any) => a.isAvailable)
-          .map((a: any) => a.dayOfWeek)
+          .map((a: any) => a.dayOfWeek),
       };
-    }
+    },
   });
 }
 
 export default function ServicePage({ params }: { params: { id: string } }) {
   const { data: service, isLoading, error } = useService(params.id);
 
-  console.log('Rendered service:', service);
+  console.log("Rendered service:", service);
 
   if (isLoading) {
-    return <ServiceDetailSkeleton />
+    return <ServiceDetailSkeleton />;
   }
 
   if (error || !service) {
-    return notFound()
+    return notFound();
   }
 
   return (
@@ -67,7 +65,9 @@ export default function ServicePage({ params }: { params: { id: string } }) {
             <div className="mt-6">
               <div className="flex justify-between items-start">
                 <div>
-                  <h1 className="text-3xl font-medium text-gray-900">{service.name}</h1>
+                  <h1 className="text-3xl font-medium text-gray-900">
+                    {service.name}
+                  </h1>
                   <p className="mt-2 text-gray-600">{service.description}</p>
                 </div>
                 <Badge className="bg-gray-100 text-gray-900 hover:bg-gray-200">
@@ -88,11 +88,13 @@ export default function ServicePage({ params }: { params: { id: string } }) {
               </div>
               {service?.availableDays && service.availableDays.length > 0 ? (
                 <div className="mt-6 border-t border-gray-100 pt-6">
-                  <h2 className="text-lg font-medium text-gray-900 mb-4">Available Days</h2>
+                  <h2 className="text-lg font-medium text-gray-900 mb-4">
+                    Available Days
+                  </h2>
                   <div className="flex flex-wrap gap-2">
                     {service.availableDays.map((day: string) => (
-                      <Badge 
-                        key={day} 
+                      <Badge
+                        key={day}
                         variant="secondary"
                         className="px-3 py-1"
                       >
@@ -122,5 +124,5 @@ export default function ServicePage({ params }: { params: { id: string } }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

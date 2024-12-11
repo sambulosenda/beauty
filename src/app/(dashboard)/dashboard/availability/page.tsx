@@ -1,4 +1,3 @@
-// app/dashboard/availability/page.tsx
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { db } from '@/db'

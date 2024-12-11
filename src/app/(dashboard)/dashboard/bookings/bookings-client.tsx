@@ -14,8 +14,6 @@ export function BookingsClient({
   initialPage: number;
 }) {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
 
   const status = searchParams.get('status')?.split(',') ?? initialStatus;
   const page = parseInt(searchParams.get('page') ?? String(initialPage), 10);
