@@ -1,110 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  CalendarIcon,
-  MapPin,
-  Search,
-  Clock,
-  Ticket,
-  Award,
-  Star,
-  ArrowRight,
-} from "lucide-react";
+import { useProviders } from "@/hooks/queries/use-providers";
 import { motion } from "framer-motion";
-
-import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
+import { Star, MapPin, Award, Clock, Search, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import Head from "next/head";
+import { useState } from "react";
+import { ProviderCard } from "@/components/provider-card";
 
 export default function Home() {
   const [treatment, setTreatment] = useState("");
   const [location, setLocation] = useState("");
+  const { data, isLoading, error } = useProviders();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle search logic here
     console.log({ treatment, location });
   };
-
-  const venues = [
-    {
-      id: "1",
-      name: "Gould Barbers Stevenage",
-      rating: 4.9,
-      reviews: 1570,
-      location: "Bedwell, Stevenage",
-      type: "Barbershop",
-      image: "/placeholder.svg?height=300&width=400",
-    },
-    {
-      id: "2",
-      name: "U.D Hair & Beauty Lounge",
-      rating: 5.0,
-      reviews: 3797,
-      location: "Park, Watford",
-      type: "Hair Salon",
-      image: "/placeholder.svg?height=300&width=400",
-    },
-    {
-      id: "3",
-      name: "The Gentlemen's Lounge Biggleswade",
-      rating: 5.0,
-      reviews: 1495,
-      location: "Biggleswade North, Biggleswade",
-      type: "Barbershop",
-      image: "/placeholder.svg?height=300&width=400",
-    },
-    {
-      id: "4",
-      name: "The Beauty Lounge Elmfield",
-      rating: 5.0,
-      reviews: 1588,
-      location: "South Croydon, London",
-      type: "Beauty Salon",
-      image: "/placeholder.svg?height=300&width=400",
-    },
-  ];
-
-  const newVenues = [
-    {
-      id: "5",
-      name: "Serenity Spa & Salon",
-      rating: 4.8,
-      reviews: 32,
-      location: "Cambridge",
-      type: "Spa & Salon",
-      image: "/placeholder.svg?height=300&width=400",
-    },
-    {
-      id: "6",
-      name: "The Barber's Chair",
-      rating: 4.9,
-      reviews: 18,
-      location: "Norwich",
-      type: "Barbershop",
-      image: "/placeholder.svg?height=300&width=400",
-    },
-    {
-      id: "7",
-      name: "Glow Up Beauty Studio",
-      rating: 5.0,
-      reviews: 25,
-      location: "Ipswich",
-      type: "Beauty Studio",
-      image: "/placeholder.svg?height=300&width=400",
-    },
-    {
-      id: "8",
-      name: "Tranquil Touch Massage",
-      rating: 4.7,
-      reviews: 41,
-      location: "Colchester",
-      type: "Massage Therapy",
-      image: "/placeholder.svg?height=300&width=400",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -222,61 +137,43 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Recommended Section - Improved Mobile Responsiveness */}
+        {/* Recommended Section */}
         <section className="py-12 sm:py-16 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 relative">
-              <span>Recommended for You</span>
+              <span>Top Beauty Professionals</span>
               <div className="absolute -bottom-2 left-0 w-20 h-0.5 bg-gray-900"></div>
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {venues.map((venue, index) => (
-                <motion.div
-                  key={venue.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <div className="group cursor-pointer overflow-hidden rounded-xl border border-gray-200 transition-colors duration-300 hover:border-gray-300">
-                    <div className="relative aspect-[4/3] overflow-hidden">
-                      <Image
-                        src={venue.image}
-                        alt={venue.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-
-                    <div className="p-4 space-y-2">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
-                        {venue.name}
-                      </h3>
-
-                      <div className="flex items-center space-x-1">
-                        <span className="font-medium text-gray-900">
-                          {venue.rating}
-                        </span>
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-gray-500">
-                          ({venue.reviews.toLocaleString()})
-                        </span>
-                      </div>
-
-                      <p className="text-gray-500 text-sm">{venue.location}</p>
-
-                      <div className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
-                        {venue.type}
-                      </div>
-                    </div>
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                {[...Array(4)].map((_, index) => (
+                  <div key={index} className="animate-pulse">
+                    <div className="aspect-[4/3] bg-gray-200 rounded-xl mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Failed to load providers</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                {data?.providers.map((provider, index) => (
+                  <ProviderCard 
+                    key={provider.id}
+                    provider={provider}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
-        {/* New to Platform Section - Improved Mobile Responsiveness */}
+        {/* New Providers Section */}
         <section className="py-12 sm:py-16 bg-gradient-to-b from-gray-50 to-white">
           <div className="container mx-auto px-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8">
@@ -289,70 +186,38 @@ export default function Home() {
                   Discover our newest beauty and wellness partners
                 </p>
               </div>
-              <Button className="mt-4 sm:mt-0 flex items-center space-x-2 bg-white text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 px-4 sm:px-6 py-2 rounded-full transition-all duration-300">
+              <Button className="mt-4 sm:mt-0 flex items-center space-x-2 bg-white text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300">
                 <span>View all</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-              {newVenues.map((venue, index) => (
-                <motion.div
-                  key={venue.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="h-full"
-                >
-                  <div className="group cursor-pointer h-full bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:border-gray-300">
-                    <div className="relative aspect-[4/3] overflow-hidden">
-                      <div className="absolute top-3 left-3 z-10">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-700">
-                          New
-                        </span>
-                      </div>
-                      <Image
-                        src={venue.image}
-                        alt={venue.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-
-                    <div className="p-5 space-y-3">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
-                        {venue.name}
-                      </h3>
-                      <div className="flex items-center space-x-1">
-                        <span className="font-medium text-gray-900">{venue.rating}</span>
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-4 h-4 ${
-                                i < Math.floor(venue.rating)
-                                  ? "fill-gray-900 text-gray-900"
-                                  : "fill-gray-200 text-gray-200"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-gray-500">({venue.reviews} reviews)</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-gray-500">
-                        <MapPin className="w-4 h-4" />
-                        <span className="text-sm">{venue.location}</span>
-                      </div>
-                      <div className="pt-2">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
-                          {venue.type}
-                        </span>
-                      </div>
-                    </div>
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                {[...Array(4)].map((_, index) => (
+                  <div key={index} className="animate-pulse">
+                    <div className="aspect-[4/3] bg-gray-200 rounded-xl mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">Failed to load new providers</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+                {data?.newProviders.map((provider, index) => (
+                  <ProviderCard 
+                    key={provider.id}
+                    provider={provider}
+                    index={index}
+                    isNew={true}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
