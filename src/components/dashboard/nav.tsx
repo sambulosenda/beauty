@@ -14,7 +14,8 @@ import {
   Bell,
   BookOpen,
   BarChart,
-  HelpCircle
+  HelpCircle,
+  UserCircle,
 } from 'lucide-react'
 import { UserButton } from '@clerk/nextjs'
 
@@ -36,6 +37,12 @@ const mainNavItems = [
     href: '/dashboard/bookings',
     icon: BookOpen,
     color: 'text-indigo-500'
+  },
+  {
+    title: 'Profile',
+    href: '/dashboard/profile',
+    icon: UserCircle,
+    color: 'text-purple-500'
   },
 ]
 
@@ -84,7 +91,13 @@ const bottomNavItems = [
     href: '/dashboard/settings',
     icon: Settings,
     color: 'text-gray-500'
-  }
+  },
+  {
+    title: 'Profile',
+    href: '/dashboard/profile',
+    icon: UserCircle,
+    color: 'text-purple-500'
+  },
 ]
 
 export function DashboardNav() {
