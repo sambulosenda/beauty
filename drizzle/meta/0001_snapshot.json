@@ -1,6 +1,6 @@
 {
-  "id": "aef16296-2ba9-439d-8596-b07f2f879c37",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "f6650151-6659-4b10-a984-d8ffef980861",
+  "prevId": "aef16296-2ba9-439d-8596-b07f2f879c37",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -604,12 +604,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": false
-        },
-        "gallery": {
-          "name": "gallery",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},

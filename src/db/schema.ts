@@ -40,6 +40,7 @@ export const users = pgTable('users', {
   stripeCustomerId: text('stripe_customer_id').unique(),
   stripeConnectAccountId: text('stripe_connect_account_id').unique(),
   stripeAccountEnabled: boolean('stripe_account_enabled').default(false),
+  gallery: text('gallery').array(),
 })
 
 export const availability = pgTable('availability', {
