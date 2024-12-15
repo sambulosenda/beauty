@@ -7,14 +7,16 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 interface PaymentFormProps {
-  bookingId: string;
   amount: number;
+  onSuccess: () => void;
+  bookingDetails: any;
 }
 
-export function PaymentForm({ bookingId, amount }: PaymentFormProps) {
+export function PaymentForm({ amount, onSuccess, bookingDetails }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -22,32 +24,26 @@ export function PaymentForm({ bookingId, amount }: PaymentFormProps) {
     e.preventDefault();
     if (!stripe || !elements) return;
 
-    setIsLoading(true);
+    setProcessing(true);
 
     try {
-      const { error } = await stripe.confirmPayment({
+      const { error: submitError } = await elements.submit();
+      if (submitError) throw submitError;
+
+      const result = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/bookings/${bookingId}/confirmation`,
+          return_url: `${window.location.origin}/bookings/confirmation`,
         },
       });
 
-      if (error) {
-        toast({
-          title: 'Payment failed',
-          description: error.message,
-          variant: 'destructive',
-        });
+      if (result.error) {
+        throw result.error;
       }
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast({
-        title: 'Payment failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
     } finally {
-      setIsLoading(false);
+      setProcessing(false);
     }
   };
 
@@ -56,10 +52,10 @@ export function PaymentForm({ bookingId, amount }: PaymentFormProps) {
       <PaymentElement />
       <Button
         type="submit"
-        disabled={!stripe || isLoading}
+        disabled={!stripe || processing}
         className="w-full"
       >
-        {isLoading ? 'Processing...' : `Pay ${amount}`}
+        {processing ? 'Processing...' : `Pay ${amount}`}
       </Button>
     </form>
   );

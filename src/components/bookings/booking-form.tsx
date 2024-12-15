@@ -14,13 +14,18 @@ import { CalendarIcon, Clock, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PaymentWrapper } from '@/components/payments/payment-wrapper'
-import { BookingFormProps } from '../../../types'
-import { CustomBookingCalendar } from './custom-booking-calendar'
+import CustomBookingCalendar from './custom-booking-calendar'
 
+interface BookingFormProps {
+  service: any;  // Update this type based on your service type
+  selectedDate: Date | null;
+  setSelectedDate: (date: Date | null) => void;
+  selectedTime: string | null;
+  setSelectedTime: (time: string | null) => void;
+  onComplete: () => void;
+}
 
-export default function BookingForm({ service }: BookingFormProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+export default function BookingForm({ service, selectedDate, setSelectedDate, selectedTime, setSelectedTime, onComplete }: BookingFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { user, isSignedIn } = useUser()
@@ -77,29 +82,17 @@ export default function BookingForm({ service }: BookingFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate || !selectedTime || !isSignedIn) return
+    if (!selectedDate || !selectedTime || !isSignedIn) return;
 
     try {
-      const startTime = parse(selectedTime, 'HH:mm', selectedDate)
-
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          serviceId: service.id,
-          providerId: service.providerId,
-          date: startTime,
-        }),
-      })
-
-      const booking = await response.json()
-      if (booking.error) throw new Error(booking.error)
-
-      setBookingId(booking.id)
-      setShowPayment(true)
+      setIsLoading(true);
+      // Instead of creating the booking here, move to payment step
+      onComplete();
     } catch (error) {
       console.error('Booking error:', error)
-      // Handle error...
+      setError('Failed to process booking. Please try again.')
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -114,8 +107,6 @@ export default function BookingForm({ service }: BookingFormProps) {
     }
     return slots
   }
-
- 
 
   if (!isSignedIn) {
     return (
@@ -138,97 +129,30 @@ export default function BookingForm({ service }: BookingFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm">
-      <div className="p-6">
-        <h2 className="text-2xl font-semibold mb-2">Book this Service</h2>
-        <p className="text-gray-600 mb-6">Select a date and time to book your appointment</p>
-
-      
-
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <CustomBookingCalendar
-              selectedDate={selectedDate}
-              onDateSelect={handleDateChange}
-              bookedDates={[]} // You can pass booked dates from your availability check
-              minDate={new Date()}
-              maxDate={addDays(new Date(), 30)}
-            />
-          </motion.div>
-
-          <AnimatePresence>
-            {selectedDate && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="grid grid-cols-2 gap-2">
-                  {generateTimeSlots().map((time) => {
-                    const isAvailable = true // Replace with actual availability check
-                    return (
-                      <Button
-                        key={time}
-                        type="button"
-                        variant={selectedTime === time ? "default" : "outline"}
-                        className={cn(
-                          "py-6",
-                          selectedTime === time && "bg-primary text-primary-foreground",
-                          !isAvailable && "opacity-50 cursor-not-allowed"
-                        )}
-                        disabled={!isAvailable}
-                        onClick={() => handleTimeChange(time)}
-                      >
-                        {format(parse(time, 'HH:mm', new Date()), 'h:mm a')}
-                      </Button>
-                    )
-                  }
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {(selectedDate || selectedTime) && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="p-4 bg-muted rounded-lg"
-            >
-              <h3 className="font-medium mb-2">Booking Summary</h3>
-              <div className="space-y-1 text-sm">
-                {selectedDate && (
-                  <p>Date: {format(selectedDate, 'EEEE, MMMM d, yyyy')}</p>
-                )}
-                {selectedTime && (
-                  <p>Time: {format(parse(selectedTime, 'HH:mm', new Date()), 'h:mm a')}</p>
-                )}
-              </div>
-            </motion.div>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-4">
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-medium mb-2">Selected Appointment</h3>
+          <p>Date: {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Not selected'}</p>
+          <p>Time: {selectedTime || 'Not selected'}</p>
         </div>
-
-        {error && (
-          <Alert variant="destructive" className="mt-6">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-      </div>
-
-      <div className="border-t p-6">
-        <Button
-          type="submit"
-          disabled={!selectedDate || !selectedTime || isLoading}
+        
+        {/* Add any additional form fields here */}
+        
+        <Button 
+          type="submit" 
+          disabled={isLoading || !selectedDate || !selectedTime}
           className="w-full"
-          size="lg"
         >
-          {isLoading ? 'Booking...' : `Book Now - ${formatCurrency(parseFloat(service.price))}`}
+          {isLoading ? 'Processing...' : 'Confirm Booking'}
         </Button>
       </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
     </form>
   )
 }

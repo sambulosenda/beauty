@@ -32,9 +32,10 @@ interface Service {
 }
 
 interface ServicesListProps {
-  initialServices: Service[]
+  initialServices: any[];
+  initialSearch?: string;
+  initialLocation?: string;
 }
-
 export function ServicesList({ initialServices }: ServicesListProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')

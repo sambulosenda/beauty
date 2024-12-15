@@ -17,14 +17,22 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface CustomBookingCalendarProps {
-  selectedDate: Date | null | undefined
-  onDateSelect: (date: Date) => void
-  bookedDates?: Date[]
-  minDate?: Date
-  maxDate?: Date
+  selectedDate: Date | null;
+  onDateSelect: (date: Date) => void;
+  bookedDates?: Date[];
+  minDate?: Date;
+  maxDate?: Date;
+  disabledDays?: (date: Date) => boolean;
 }
 
-export function CustomBookingCalendar({ selectedDate, onDateSelect, bookedDates = [], minDate, maxDate }: CustomBookingCalendarProps) {
+export default function CustomBookingCalendar({ 
+  selectedDate, 
+  onDateSelect, 
+  bookedDates = [], 
+  minDate, 
+  maxDate,
+  disabledDays 
+}: CustomBookingCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
   const monthStart = startOfMonth(currentMonth)
@@ -41,7 +49,7 @@ export function CustomBookingCalendar({ selectedDate, onDateSelect, bookedDates 
     bookedDates.some(d => isSameDay(d, date))
 
   return (
-    <div className="w-full max-w-sm mx-auto bg-white">
+    <div className="rounded-lg border p-4">
       <div className="flex items-center justify-between mb-4">
         <button onClick={previousMonth} className="p-2">
           <ChevronLeft className="w-6 h-6 text-gray-600" />
@@ -65,18 +73,21 @@ export function CustomBookingCalendar({ selectedDate, onDateSelect, bookedDates 
           const isCurrentMonth = isSameMonth(day, currentMonth)
           const isSelected = selectedDate && isSameDay(day, selectedDate)
           const isHighlightedDate = isHighlighted(day)
+          const isDisabled = disabledDays ? disabledDays(day) : false
 
           return (
             <button
               key={day.toString()}
-              onClick={() => onDateSelect && onDateSelect(day)}
+              onClick={() => !isDisabled && onDateSelect(day)}
+              disabled={isDisabled}
               className={cn(
                 "h-10 w-10 flex items-center justify-center rounded-full text-sm",
                 !isCurrentMonth && "text-gray-300",
                 isCurrentMonth && !isSelected && !isHighlightedDate && "text-gray-900",
                 isSelected && "bg-blue-900 text-white",
                 isHighlightedDate && !isSelected && "border border-gray-300",
-                isCurrentMonth && !isSelected && "hover:bg-gray-100"
+                isCurrentMonth && !isSelected && !isDisabled && "hover:bg-gray-100",
+                isDisabled && "opacity-50 cursor-not-allowed bg-gray-100"
               )}
             >
               {format(day, 'd')}
