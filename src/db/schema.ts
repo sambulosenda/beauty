@@ -99,6 +99,7 @@ export const bookings = pgTable('bookings', {
   }).default('pending'),
   amount: decimal('amount', { precision: 10, scale: 2 }),
   currency: text('currency').default('usd'),
+  
 })
 
 // Reviews Table

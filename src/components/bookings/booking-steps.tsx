@@ -89,11 +89,16 @@ export default function BookingSteps({ serviceId, onComplete }: BookingStepsProp
     setCanProceed(true);
   };
 
-  const handleBookingSubmit = async () => {
+  const handleFormComplete = () => {
+    setCanProceed(true);
+    handleNextStep(); // Move to payment step
+  };
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
     if (!selectedDate || !selectedTime || !service) return;
 
     try {
-      const startTime = parse(selectedTime, 'HH:mm', selectedDate!);
+      const startTime = parse(selectedTime, 'HH:mm', selectedDate);
 
       const response = await fetch('/api/bookings', {
         method: 'POST',
@@ -102,6 +107,7 @@ export default function BookingSteps({ serviceId, onComplete }: BookingStepsProp
           serviceId: service.id,
           providerId: service.providerId,
           date: startTime,
+          paymentIntentId,
         }),
       });
 
@@ -109,8 +115,7 @@ export default function BookingSteps({ serviceId, onComplete }: BookingStepsProp
       if (booking.error) throw new Error(booking.error);
 
       setBookingId(booking.id);
-      setCanProceed(true);
-      handleNextStep();
+      handleNextStep(); // Move to confirmation step
     } catch (error) {
       console.error('Booking error:', error);
       setError('Failed to create booking. Please try again.');
@@ -198,15 +203,20 @@ export default function BookingSteps({ serviceId, onComplete }: BookingStepsProp
                 setSelectedDate={setSelectedDate}
                 selectedTime={selectedTime}
                 setSelectedTime={setSelectedTime}
-                onComplete={handleBookingSubmit}
+                onComplete={handleFormComplete}
               />
             </div>
           )}
-          {currentStep === 2 && bookingId && (
+          {currentStep === 2 && (
             <div>
               <PaymentWrapper
-                bookingId={bookingId}
                 amount={service?.price ? parseFloat(service.price) : 0}
+                onSuccess={handlePaymentSuccess}
+                bookingDetails={{
+                  date: selectedDate,
+                  time: selectedTime,
+                  service: service
+                }}
               />
             </div>
           )}

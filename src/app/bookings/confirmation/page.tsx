@@ -1,15 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Check, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function BookingConfirmationPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [status, setStatus] = useState<'success' | 'error' | 'loading'>('loading');
 
   useEffect(() => {
-    const paymentIntent = searchParams.get('payment_intent');
     const redirectStatus = searchParams.get('redirect_status');
 
     if (redirectStatus === 'succeeded') {
@@ -18,6 +19,10 @@ export default function BookingConfirmationPage() {
       setStatus('error');
     }
   }, [searchParams]);
+
+  const handleReturn = () => {
+    router.push('/dashboard');
+  };
 
   if (status === 'loading') {
     return (
@@ -34,7 +39,7 @@ export default function BookingConfirmationPage() {
           <>
             <Check className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-4">Booking Confirmed!</h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mb-6">
               Thank you for your booking. You will receive a confirmation email shortly.
             </p>
           </>
@@ -42,11 +47,12 @@ export default function BookingConfirmationPage() {
           <>
             <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h1 className="text-2xl font-bold mb-4">Payment Failed</h1>
-            <p className="text-gray-600">
+            <p className="text-gray-600 mb-6">
               There was an issue processing your payment. Please try again.
             </p>
           </>
         )}
+        <Button onClick={handleReturn}>Return to Dashboard</Button>
       </div>
     </div>
   );

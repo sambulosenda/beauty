@@ -82,29 +82,17 @@ export default function BookingForm({ service, selectedDate, setSelectedDate, se
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate || !selectedTime || !isSignedIn) return
+    if (!selectedDate || !selectedTime || !isSignedIn) return;
 
     try {
-      const startTime = parse(selectedTime, 'HH:mm', selectedDate)
-
-      const response = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          serviceId: service.id,
-          providerId: service.providerId,
-          date: startTime,
-        }),
-      })
-
-      const booking = await response.json()
-      if (booking.error) throw new Error(booking.error)
-
-      setBookingId(booking.id)
-      setShowPayment(true)
+      setIsLoading(true);
+      // Instead of creating the booking here, move to payment step
+      onComplete();
     } catch (error) {
       console.error('Booking error:', error)
-      // Handle error...
+      setError('Failed to process booking. Please try again.')
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -149,10 +137,14 @@ export default function BookingForm({ service, selectedDate, setSelectedDate, se
           <p>Time: {selectedTime || 'Not selected'}</p>
         </div>
         
-        {/* Add your booking form fields here */}
+        {/* Add any additional form fields here */}
         
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Confirming...' : 'Confirm Booking'}
+        <Button 
+          type="submit" 
+          disabled={isLoading || !selectedDate || !selectedTime}
+          className="w-full"
+        >
+          {isLoading ? 'Processing...' : 'Confirm Booking'}
         </Button>
       </div>
 
