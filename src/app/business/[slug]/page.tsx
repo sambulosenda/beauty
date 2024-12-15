@@ -6,10 +6,13 @@ import Image from 'next/image'
 import { MapPin, Star, Phone, Mail } from 'lucide-react'
 import { ServiceList } from '@/components/services/service-list'
 import { Separator } from '@/components/ui/separator'
+import { BusinessGalleryClient } from '@/app/business/[slug]/business-gallery-client'
 
 export default async function BusinessPage({ params }: { params: { slug: string } }) {
+  const slug = await params.slug
+  
   const business = await db.query.users.findFirst({
-    where: eq(users.slug, params.slug),
+    where: eq(users.slug, slug),
     columns: {
       id: true,
       name: true,
@@ -20,6 +23,7 @@ export default async function BusinessPage({ params }: { params: { slug: string 
       address: true,
       phone: true,
       email: true,
+      gallery: true,
     }
   })
 
@@ -99,10 +103,18 @@ export default async function BusinessPage({ params }: { params: { slug: string 
           )}
         </div>
 
+        {/* Gallery Section */}
+        {business.gallery && business.gallery.length > 0 && (
+          <section className="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h2 className="text-2xl font-bold mb-6">Gallery</h2>
+            <BusinessGalleryClient images={business.gallery} />
+          </section>
+        )}
+
         {/* Services Section */}
         <section className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-2xl font-bold mb-6">Our Services</h2>
-          <ServiceList services={businessServices} businessSlug={params.slug} />
+          <ServiceList services={businessServices} businessSlug={slug} />
         </section>
       </div>
     </main>
