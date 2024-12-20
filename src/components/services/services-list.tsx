@@ -66,7 +66,7 @@ export function ServicesList({ initialServices }: ServicesListProps) {
     <div className="container mx-auto px-4">
       <div className="space-y-8">
         {/* Search and Filter Section */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
           <div className="flex flex-col gap-6">
             {/* Search Bar */}
             <div className="relative">
@@ -115,67 +115,57 @@ export function ServicesList({ initialServices }: ServicesListProps) {
         </div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedServices.map((service) => (
             <Link href={`/services/${service.id}`} key={service.id}>
-              <div className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 flex">
-                {/* Service Image */}
-                <div className="w-48 h-48 flex-shrink-0">
-                  {service.image ? (
+              <div className="group relative bg-white rounded-2xl border border-gray-100 hover:border-rose-100 transition-all duration-300 overflow-hidden">
+                {service.image ? (
+                  <div className="relative h-48 overflow-hidden">
                     <img
                       src={service.image}
                       alt={service.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-gray-400">No image</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Service Details */}
-                <div className="flex-1 p-6">
-                  <div className="flex flex-col h-full justify-between">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                  </div>
+                ) : (
+                  <div className="h-48 bg-rose-50 flex items-center justify-center">
+                    <span className="text-rose-600 text-lg">No image available</span>
+                  </div>
+                )}
+                
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
                     <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-lg font-semibold group-hover:text-rose-600 transition-colors">
-                          {service.name}
-                        </h3>
-                        <Badge variant="secondary" className="ml-2">
-                          {service.category}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{service.provider.name}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          <span>{service.duration} mins</span>
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-rose-600 transition-colors">
+                        {service.name}
+                      </h3>
+                      {service.provider && (
+                        <div className="flex items-center mt-1 text-sm text-gray-500">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {service.provider.name}
                         </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          <span className="truncate">{service.provider.address}</span>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                    <div className="mt-2 flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        {service.rating !== null ? (
-                          <>
-                            <Star
-                              className="h-4 w-4 text-yellow-400 fill-yellow-400"
-                              aria-hidden="true"
-                            />
-                            {/* <span className="text-sm font-medium">{service.rating.toFixed(1)}</span> */}
-                          </>
-                        ) : (
-                          <span className="text-sm text-gray-500">No ratings yet</span>
-                        )}
-                      </div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {/* ${service.price.toFixed(2)} */}
-                      </p>
+                    <Badge variant="secondary" className="ml-2">
+                      {service.category}
+                    </Badge>
+                  </div>
+                  
+                  {service.description && (
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      {service.description}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                    <div className="flex items-center text-gray-500 text-sm">
+                      <Clock className="h-4 w-4 mr-1" />
+                      {service.duration} mins
                     </div>
+                    <span className="text-lg font-semibold text-rose-600">
+                      ${service.price}
+                    </span>
                   </div>
                 </div>
               </div>
