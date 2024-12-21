@@ -1,8 +1,6 @@
 // app/bookings/[id]/page.tsx
 import { notFound } from 'next/navigation'
-import { db } from '@/db'
-import { bookings, services, users, reviews } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { getBookingById } from '@/hooks/queries/useBooking'
 import { formatCurrency } from '@/lib/utils'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
@@ -12,84 +10,8 @@ import { Clock, MapPin, Calendar, CheckCircle2, AlertCircle } from 'lucide-react
 import { BookingStatusUpdate } from '@/components/bookings/booking-status-update'
 import { ClientBookingStatus } from '@/components/bookings/client-booking-status'
 
-interface PageProps {
-  params: Promise<{ id: string }>
-  searchParams: { [key: string]: string | string[] | undefined }
-}
-
-type BookingWithReview = {
-  id: string
-  startTime: Date
-  endTime: Date
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
-  service: {
-    id: string
-    name: string
-    price: string
-    duration: number
-  }
-  provider: {
-    id: string
-    name: string | null
-    businessName: string | null
-  }
-  review?: {
-    id: string
-    rating: number
-    comment: string
-    createdAt: Date
-    customer: {
-      name: string | null
-    }
-  } | null
-}
-
-async function fetchBooking(bookingId: string): Promise<BookingWithReview | null> {
-  try {
-    const result = await db
-      .select({
-        id: bookings.id,
-        startTime: bookings.startTime,
-        endTime: bookings.endTime,
-        status: bookings.status,
-        service: {
-          id: services.id,
-          name: services.name,
-          price: services.price,
-          duration: services.duration,
-        },
-        provider: {
-          id: users.id,
-          name: users.name,
-          businessName: users.businessName,
-        },
-        review: {
-          id: reviews.id,
-          rating: reviews.rating,
-          comment: reviews.comment,
-          createdAt: reviews.createdAt,
-          customer: {
-            name: users.name,
-          },
-        },
-      })
-      .from(bookings)
-      .leftJoin(services, eq(services.id, bookings.serviceId))
-      .leftJoin(users, eq(users.id, bookings.providerId))
-      .leftJoin(reviews, eq(reviews.bookingId, bookings.id))
-      .where(eq(bookings.id, bookingId))
-      .then(rows => rows[0])
-
-    return result as BookingWithReview
-  } catch (error) {
-    console.error('Error fetching booking:', error)
-    return null
-  }
-}
-
-export async function generateMetadata(props: PageProps): Promise<Metadata> {
-  const params = await props.params
-  const booking = await fetchBooking(params.id)
+export async function generateMetadata(props: { params: { id: string } }): Promise<Metadata> {
+  const booking = await getBookingById(props.params.id)
 
   if (!booking) {
     return {
@@ -103,9 +25,8 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   }
 }
 
-export default async function BookingPage(props: PageProps) {
-  const params = await props.params
-  const booking = await fetchBooking(params.id)
+export default async function BookingPage({ params }: { params: { id: string } }) {
+  const booking = await getBookingById(params.id)
 
   if (!booking) {
     notFound()

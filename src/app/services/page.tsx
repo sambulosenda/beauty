@@ -22,7 +22,7 @@ export default async function ServicesPage({
   searchParams: { search?: string; location?: string }
 }) {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-16">
       <section className="relative bg-gradient-to-r from-rose-100 to-amber-100">
         <div className="absolute inset-0 bg-white/50" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

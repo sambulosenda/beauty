@@ -9,9 +9,17 @@ import { useState } from "react"
 import { DesktopNav } from "./desktop-nav"
 import { MobileNav } from "./mobile-nav"
 import { motion } from "framer-motion"
+import { useScroll } from "framer-motion"
+import { useMotionValueEvent } from "framer-motion"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
+  const { scrollY } = useScroll()
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > 0)
+  })
 
   return (
     <motion.nav
@@ -19,8 +27,10 @@ export default function Navbar() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className={cn(
-        "sticky top-0 z-50 w-full backdrop-blur-sm bg-white/80",
-        "border-b border-gray-100",
+        "sticky top-0 z-50 w-full",
+        isScrolled 
+          ? "bg-white/95 backdrop-blur-md border-b border-gray-100" 
+          : "bg-white border-b border-gray-100",
         "font-outfit"
       )}
     >

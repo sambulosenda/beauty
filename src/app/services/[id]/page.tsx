@@ -15,10 +15,15 @@ function useService(serviceId: string) {
   return useQuery({
     queryKey: ["service", serviceId],
     queryFn: async () => {
-      const serviceResponse = await fetch(`/api/services/${serviceId}`);
-      const service = await serviceResponse.json();
-      const availabilityResponse = await fetch(`/api/availability/${service.providerId}`);
-      const availability = await availabilityResponse.json();
+      const [serviceResponse, availabilityResponse] = await Promise.all([
+        fetch(`/api/services/${serviceId}`),
+        fetch(`/api/availability/${serviceId}`)
+      ]);
+
+      const [service, availability] = await Promise.all([
+        serviceResponse.json(),
+        availabilityResponse.json()
+      ]);
 
       return {
         ...service,
@@ -27,6 +32,8 @@ function useService(serviceId: string) {
           .map((a: any) => a.dayOfWeek),
       };
     },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
   });
 }
 
@@ -133,7 +140,12 @@ export default function ServicePage({ params }: { params: { id: string } }) {
                   <span className="text-sm font-medium">Secure Booking</span>
                 </div>
               </div>
-              <BookingDialog serviceId={params.id} />
+                
+        <Link href={`/services/${params.id}/book`} className="mt-6 block">
+          <Button size="lg" className="w-full">
+            Book Now
+          </Button>
+        </Link>
             </div>
           </div>
         </div>

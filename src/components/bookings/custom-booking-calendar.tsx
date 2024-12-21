@@ -49,26 +49,34 @@ export default function CustomBookingCalendar({
     bookedDates.some(d => isSameDay(d, date))
 
   return (
-    <div className="rounded-lg border p-4">
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={previousMonth} className="p-2">
-          <ChevronLeft className="w-6 h-6 text-gray-600" />
+    <div className="w-full">
+      <div className="flex items-center justify-between px-2 mb-4">
+        <button 
+          onClick={previousMonth}
+          className="p-1 hover:bg-gray-50 rounded-md"
+        >
+          <ChevronLeft className="h-4 w-4" />
         </button>
-        <h2 className="text-1xl font-bold">
+        <h2 className="text-base font-medium">
           {format(currentMonth, 'MMMM yyyy')}
         </h2>
-        <button onClick={nextMonth} className="p-2">
-          <ChevronRight className="w-6 h-6 text-gray-600" />
+        <button 
+          onClick={nextMonth}
+          className="p-1 hover:bg-gray-50 rounded-md"
+        >
+          <ChevronRight className="h-4 w-4" />
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-2 mb-2">
+
+      <div className="grid grid-cols-7 text-center mb-2">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="text-center text-sm font-medium text-gray-500">
+          <div key={day} className="text-sm text-muted-foreground">
             {day}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-2">
+
+      <div className="grid grid-cols-7 text-center gap-y-1">
         {days.map(day => {
           const isCurrentMonth = isSameMonth(day, currentMonth)
           const isSelected = selectedDate && isSameDay(day, selectedDate)
@@ -81,13 +89,13 @@ export default function CustomBookingCalendar({
               onClick={() => !isDisabled && onDateSelect(day)}
               disabled={isDisabled}
               className={cn(
-                "h-10 w-10 flex items-center justify-center rounded-full text-sm",
+                "aspect-square w-full flex items-center justify-center text-sm",
+                "hover:bg-gray-50 transition-colors",
                 !isCurrentMonth && "text-gray-300",
-                isCurrentMonth && !isSelected && !isHighlightedDate && "text-gray-900",
-                isSelected && "bg-blue-900 text-white",
-                isHighlightedDate && !isSelected && "border border-gray-300",
-                isCurrentMonth && !isSelected && !isDisabled && "hover:bg-gray-100",
-                isDisabled && "opacity-50 cursor-not-allowed bg-gray-100"
+                isCurrentMonth && !isSelected && "text-gray-900",
+                isSelected && "bg-blue-600 text-white rounded-full",
+                isDisabled && "cursor-not-allowed opacity-50 hover:bg-transparent",
+                isHighlightedDate && !isSelected && "border border-blue-600"
               )}
             >
               {format(day, 'd')}
@@ -95,6 +103,27 @@ export default function CustomBookingCalendar({
           )
         })}
       </div>
+
+      {/* {selectedDate && (
+        <div className="mt-6">
+          <h3 className="text-sm font-medium mb-3">Available Times</h3>
+          <div className="grid grid-cols-4 gap-2">
+            {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'].map((time) => (
+              <button
+                key={time}
+                onClick={() => onDateSelect(selectedDate)}
+                className={cn(
+                  "py-2 px-4 text-sm rounded-lg border border-gray-200",
+                  "hover:border-blue-600 transition-colors",
+                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                )}
+              >
+                {time}
+              </button>
+            ))}
+          </div>
+        </div>
+      )} */}
     </div>
   )
 }
