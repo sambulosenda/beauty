@@ -34,7 +34,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error checking stripe status:", error);
+    console.error("Error checkig stripe status:", error);
     return NextResponse.json(
       { error: "Failed to check provider stripe status" },
       { status: 500 }
