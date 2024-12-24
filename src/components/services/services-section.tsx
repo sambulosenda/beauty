@@ -18,19 +18,11 @@ export function ServicesSection({
   initialCategory,
   children 
 }: ServicesSectionProps) {
-  const [filters, setFilters] = useState<{
-    priceRange: [number, number];
-    duration: [number, number];
-    rating: number | null;
-  }>({
+  const [filters, setFilters] = useState({
     priceRange: [0, 500] as [number, number],
     duration: [30, 180] as [number, number],
-    rating: null
+    rating: null as number | null
   })
-
-  const handleFilterChange = (type: string, value: any) => {
-    setFilters(prev => ({ ...prev, [type]: value }))
-  }
 
   const { data: services, isLoading, error } = useServices({
     search: initialSearch,
@@ -39,15 +31,21 @@ export function ServicesSection({
     filters
   })
 
+  const handleFilterChange = (type: string, value: any) => {
+    setFilters(prev => ({ ...prev, [type]: value }))
+  }
+
   if (isLoading) return <ServicesPageSkeleton />
   if (error) return <div>Error loading services</div>
+
+  console.log('Search params:', { search: initialSearch, location: initialLocation })
 
   return (
     <>
       {children(handleFilterChange)}
       <div className="lg:col-span-9">
         <ServicesList 
-          initialServices={services || []} 
+          initialServices={services || []}
           initialSearch={initialSearch}
           initialLocation={initialLocation}
           initialCategory={initialCategory}

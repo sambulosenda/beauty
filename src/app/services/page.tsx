@@ -7,10 +7,23 @@ export const metadata: Metadata = {
   keywords: "beauty, wellness, spa, massage, salon, booking",
 }
 
-export default function ServicesPage({
+interface SearchParams {
+  search?: string
+  location?: string
+  category?: string
+}
+
+export default async function ServicesPage({
   searchParams,
 }: {
-  searchParams: { search?: string; location?: string; category?: string }
+  searchParams: SearchParams
 }) {
-  return <ServicesPageContent searchParams={searchParams} />
+  // Ensure searchParams are handled properly
+  const validatedParams: SearchParams = {
+    search: typeof searchParams.search === 'string' ? searchParams.search : undefined,
+    location: typeof searchParams.location === 'string' ? searchParams.location : undefined,
+    category: typeof searchParams.category === 'string' ? searchParams.category : undefined,
+  }
+
+  return <ServicesPageContent searchParams={validatedParams} />
 }

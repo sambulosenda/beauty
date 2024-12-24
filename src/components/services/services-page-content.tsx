@@ -5,12 +5,14 @@ import { ServicesSection } from "./services-section"
 import { FiltersSection } from "./filters-section"
 import { SearchBar } from "./search-bar"
 
+interface SearchParams {
+  search?: string
+  location?: string
+  category?: string
+}
+
 interface ServicesPageContentProps {
-  searchParams: {
-    search?: string
-    location?: string
-    category?: string
-  }
+  searchParams: SearchParams
 }
 
 export function ServicesPageContent({ searchParams }: ServicesPageContentProps) {
