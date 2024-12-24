@@ -17,17 +17,19 @@ interface Service {
 interface UseServicesParams {
   search?: string;
   location?: string;
+  category?: string;
 }
 
-export function useServices({ search, location }: UseServicesParams = {}) {
+export function useServices({ search, location, category }: UseServicesParams) {
   return useQuery({
-    queryKey: ['services', { search, location }],
+    queryKey: ['services', search, location, category],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (location) params.append('location', location);
+      if (category && category !== 'all') params.append('category', category);
       
-      const response = await fetch(`/api/services?${params}`);
+      const response = await fetch(`/api/services?${params.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch services');
       return response.json();
     },

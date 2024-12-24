@@ -18,6 +18,16 @@ const categories = [
 export function Categories({ selectedCategory }: { selectedCategory?: string }) {
   const router = useRouter()
 
+  const handleCategoryClick = (categoryId: string) => {
+    const params = new URLSearchParams(window.location.search)
+    if (categoryId === 'all') {
+      params.delete('category')
+    } else {
+      params.set('category', categoryId)
+    }
+    router.push(`/services?${params.toString()}`);
+  }
+
   return (
     <div className="space-y-2">
       {categories.map((category) => (
@@ -26,11 +36,10 @@ export function Categories({ selectedCategory }: { selectedCategory?: string }) 
           variant="ghost"
           className={cn(
             'w-full justify-start text-gray-600 hover:text-rose-600 hover:bg-rose-50',
-            selectedCategory === category.id && 'bg-rose-50 text-rose-600'
+            selectedCategory === category.id && 'bg-rose-50 text-rose-600',
+            (!selectedCategory && category.id === 'all') && 'bg-rose-50 text-rose-600'
           )}
-          onClick={() => {
-            router.push(`/services?category=${category.id}`)
-          }}
+          onClick={() => handleCategoryClick(category.id)}
         >
           <span className="mr-2">{category.icon}</span>
           {category.name}

@@ -7,12 +7,18 @@ import { ServicesPageSkeleton } from './services-page-skeleton'
 interface ServicesSectionProps {
   initialSearch?: string;
   initialLocation?: string;
+  initialCategory?: string;
 }
 
-export function ServicesSection({ initialSearch, initialLocation }: ServicesSectionProps) {
+export function ServicesSection({ 
+  initialSearch, 
+  initialLocation, 
+  initialCategory 
+}: ServicesSectionProps) {
   const { data: services, isLoading, error } = useServices({
     search: initialSearch,
-    location: initialLocation
+    location: initialLocation,
+    category: initialCategory
   });
 
   if (isLoading) {
@@ -27,5 +33,6 @@ export function ServicesSection({ initialSearch, initialLocation }: ServicesSect
     initialServices={services || []} 
     initialSearch={initialSearch}
     initialLocation={initialLocation}
+    initialCategory={initialCategory}
   />;
 } 

@@ -4,7 +4,10 @@ import { ServicesPageSkeleton } from "@/components/services/services-page-skelet
 import { SearchBar } from "@/components/services/search-bar";
 import { Categories } from "@/components/services/categories";
 import { Metadata } from "next";
-import { PriceRangeFilter, DurationFilter, RatingFilter } from "@/components/services/filters";
+import { Button } from "@/components/ui/button";
+import { FilterIcon, X } from "lucide-react";
+import { DurationFilter, PriceRangeFilter, RatingFilter } from "@/components/services/filters";
+import { MobileFilters } from "@/components/services/mobile-filters";
 
 export const metadata: Metadata = {
   title: "Discover Beauty Services",
@@ -31,9 +34,11 @@ export default async function ServicesPage({
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-12 gap-8">
-          {/* Sidebar */}
-          <div className="col-span-3 space-y-6">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+          <MobileFilters selectedCategory={searchParams.category} />
+
+          {/* Sidebar - Hidden on Mobile */}
+          <div className="hidden lg:block lg:col-span-3 space-y-6">
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <h2 className="font-semibold mb-4">Categories</h2>
               <Categories 
@@ -50,7 +55,7 @@ export default async function ServicesPage({
           </div>
 
           {/* Services Grid */}
-          <div className="col-span-9">
+          <div className="lg:col-span-9">
             <Suspense fallback={<ServicesPageSkeleton />}>
               <ServicesSection 
                 initialSearch={searchParams.search}

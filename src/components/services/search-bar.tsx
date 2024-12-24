@@ -25,13 +25,13 @@ export function SearchBar({ initialSearch, initialLocation }: SearchBarProps) {
   }
 
   return (
-    <form onSubmit={handleSearch} className="flex gap-4">
-      <div className="flex-1 flex gap-4">
+    <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
+      <div className="flex-1 flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
             type="text"
-            placeholder="Search services or treatments..."
+            placeholder="Search services..."
             className="pl-10 h-12"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -48,7 +48,7 @@ export function SearchBar({ initialSearch, initialLocation }: SearchBarProps) {
           />
         </div>
       </div>
-      <Button type="submit" size="lg" className="px-8">
+      <Button type="submit" size="lg" className="w-full sm:w-auto px-8">
         Search
       </Button>
     </form>

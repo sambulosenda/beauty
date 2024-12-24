@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import Image from 'next/image'
 
 interface Service {
   id: string
@@ -36,11 +35,18 @@ interface ServicesListProps {
   initialServices: any[];
   initialSearch?: string;
   initialLocation?: string;
+  initialCategory?: string;
 }
-export function ServicesList({ initialServices }: ServicesListProps) {
+
+export function ServicesList({ 
+  initialServices, 
+  initialSearch, 
+  initialLocation, 
+  initialCategory 
+}: ServicesListProps) {
   return (
     <div className="space-y-6">
-      {/* Results Summary */}
+      {/* Results Summary and Sort */}
       <div className="flex items-center justify-between">
         <p className="text-gray-600">
           Showing {initialServices.length} services
@@ -59,65 +65,61 @@ export function ServicesList({ initialServices }: ServicesListProps) {
       </div>
 
       {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {initialServices.map((service) => (
           <Link 
             href={`/services/${service.id}`} 
             key={service.id}
             className="group"
           >
-            <div className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-rose-100 hover:shadow-lg transition-all duration-300">
-              <div className="relative h-48">
-                {service.image ? (
-                  <Image
+            <div className="group relative bg-white rounded-2xl border border-gray-100 hover:border-rose-100 transition-all duration-300 overflow-hidden">
+              {service.image ? (
+                <div className="relative h-48 overflow-hidden">
+                  <img
                     src={service.image}
                     alt={service.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                ) : (
-                  <div className="h-full bg-rose-50 flex items-center justify-center">
-                    <span className="text-rose-600">No image available</span>
-                  </div>
-                )}
-                <div className="absolute top-4 right-4">
-                  <Badge variant="secondary" className="bg-white/90">
-                    {service.category}
-                  </Badge>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                 </div>
-              </div>
-
+              ) : (
+                <div className="h-48 bg-rose-50 flex items-center justify-center">
+                  <span className="text-rose-600 text-lg">No image available</span>
+                </div>
+              )}
+              
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold group-hover:text-rose-600 transition-colors">
+                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-rose-600 transition-colors">
                       {service.name}
                     </h3>
-                    <div className="flex items-center mt-1 text-sm text-gray-500">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {service.provider.name}
-                    </div>
+                    {service.provider && (
+                      <div className="flex items-center mt-1 text-sm text-gray-500">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {service.provider.name}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-rose-600">
-                      ${service.price}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {service.duration} mins
-                    </div>
-                  </div>
+                  <Badge variant="secondary" className="ml-2">
+                    {service.category}
+                  </Badge>
                 </div>
+                
+                {service.description && (
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {service.description}
+                  </p>
+                )}
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                  <div className="flex items-center">
-                    <Star className="h-4 w-4 text-amber-400 fill-current" />
-                    <span className="ml-1 text-sm text-gray-600">
-                      {service.rating || '4.8'} ({service.reviewCount || '24'})
-                    </span>
+                  <div className="flex items-center text-gray-500 text-sm">
+                    <Clock className="h-4 w-4 mr-1" />
+                    {service.duration} mins
                   </div>
-                  <Button variant="ghost" size="sm">
-                    View Details
-                  </Button>
+                  <span className="text-lg font-semibold text-rose-600">
+                    ${service.price}
+                  </span>
                 </div>
               </div>
             </div>
