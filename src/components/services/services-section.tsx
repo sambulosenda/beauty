@@ -18,9 +18,13 @@ export function ServicesSection({
   initialCategory,
   children 
 }: ServicesSectionProps) {
-  const [filters, setFilters] = useState({
-    priceRange: [0, 500],
-    duration: [30, 180],
+  const [filters, setFilters] = useState<{
+    priceRange: [number, number];
+    duration: [number, number];
+    rating: number | null;
+  }>({
+    priceRange: [0, 500] as [number, number],
+    duration: [30, 180] as [number, number],
     rating: null
   })
 

@@ -18,18 +18,22 @@ interface UseServicesParams {
   search?: string;
   location?: string;
   category?: string;
+  filters?: {
+    priceRange: [number, number];
+    duration: [number, number];
+    rating: number | null;
+  };
 }
 
-export function useServices({ search, location, category }: UseServicesParams) {
+export function useServices({ search, location, category, filters }: UseServicesParams) {
   return useQuery({
-    queryKey: ['services', search, location, category],
+    queryKey: ['services', { search, location }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (location) params.append('location', location);
-      if (category && category !== 'all') params.append('category', category);
       
-      const response = await fetch(`/api/services?${params.toString()}`);
+      const response = await fetch(`/api/services?${params}`);
       if (!response.ok) throw new Error('Failed to fetch services');
       return response.json();
     },

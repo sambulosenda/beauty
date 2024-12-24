@@ -7,9 +7,10 @@ import { DurationFilter, PriceRangeFilter, RatingFilter } from "./filters"
 
 interface MobileFiltersProps {
   selectedCategory?: string
+  onFilterChange: (type: string, value: any) => void
 }
 
-export function MobileFilters({ selectedCategory }: MobileFiltersProps) {
+export function MobileFilters({ selectedCategory, onFilterChange }: MobileFiltersProps) {
   return (
     <>
       {/* Mobile Filter Button */}
@@ -45,9 +46,9 @@ export function MobileFilters({ selectedCategory }: MobileFiltersProps) {
             </div>
             <div>
               <h2 className="font-semibold mb-4">Filters</h2>
-              <PriceRangeFilter />
-              <DurationFilter />
-              <RatingFilter />
+              <PriceRangeFilter onFilterChange={onFilterChange} />
+              <DurationFilter onFilterChange={onFilterChange} />
+              <RatingFilter onFilterChange={onFilterChange} />
             </div>
           </div>
         </div>
