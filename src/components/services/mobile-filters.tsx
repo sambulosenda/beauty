@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { FilterIcon, X } from "lucide-react"
 import { Categories } from "./categories"
-import { PriceRangeFilter, DurationFilter, RatingFilter } from "./filters"
+import { DurationFilter, PriceRangeFilter, RatingFilter } from "./filters"
 
 interface MobileFiltersProps {
   selectedCategory?: string
