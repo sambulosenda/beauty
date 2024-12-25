@@ -1,28 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import { 
-  addMonths, 
-  subMonths,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
-  format,
-  isSameMonth,
-  isSameDay
-} from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
 
 interface CustomBookingCalendarProps {
-  selectedDate: Date | null;
-  onDateSelect: (date: Date) => void;
-  bookedDates?: Date[];
-  minDate?: Date;
-  maxDate?: Date;
-  disabledDays?: (date: Date) => boolean;
+  selectedDate: Date | null
+  onDateSelect: (date: Date) => void
+  bookedDates?: Date[]
+  minDate?: Date
+  maxDate?: Date
+  disabledDays?: (date: Date) => boolean
 }
 
 export default function CustomBookingCalendar({ 
@@ -33,97 +20,66 @@ export default function CustomBookingCalendar({
   maxDate,
   disabledDays 
 }: CustomBookingCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-
-  const monthStart = startOfMonth(currentMonth)
-  const monthEnd = endOfMonth(monthStart)
-  const calendarStart = startOfWeek(monthStart)
-  const calendarEnd = endOfWeek(monthEnd)
-
-  const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd })
-
-  const previousMonth = () => setCurrentMonth(subMonths(currentMonth, 1))
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1))
-
-  const isHighlighted = (date: Date) => 
-    bookedDates.some(d => isSameDay(d, date))
-
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between px-2 mb-4">
-        <button 
-          onClick={previousMonth}
-          className="p-1 hover:bg-gray-50 rounded-md"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <h2 className="text-base font-medium">
-          {format(currentMonth, 'MMMM yyyy')}
-        </h2>
-        <button 
-          onClick={nextMonth}
-          className="p-1 hover:bg-gray-50 rounded-md"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-
-      <div className="grid grid-cols-7 text-center mb-2">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="text-sm text-muted-foreground">
-            {day}
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-7 text-center gap-y-1">
-        {days.map(day => {
-          const isCurrentMonth = isSameMonth(day, currentMonth)
-          const isSelected = selectedDate && isSameDay(day, selectedDate)
-          const isHighlightedDate = isHighlighted(day)
-          const isDisabled = disabledDays ? disabledDays(day) : false
-
-          return (
-            <button
-              key={day.toString()}
-              onClick={() => !isDisabled && onDateSelect(day)}
-              disabled={isDisabled}
-              className={cn(
-                "aspect-square w-full flex items-center justify-center text-sm",
-                "hover:bg-gray-50 transition-colors",
-                !isCurrentMonth && "text-gray-300",
-                isCurrentMonth && !isSelected && "text-gray-900",
-                isSelected && "bg-blue-600 text-white rounded-full",
-                isDisabled && "cursor-not-allowed opacity-50 hover:bg-transparent",
-                isHighlightedDate && !isSelected && "border border-blue-600"
-              )}
-            >
-              {format(day, 'd')}
-            </button>
+    <div className="p-6 border rounded-lg bg-white">
+      <Calendar
+        mode="single"
+        selected={selectedDate}
+        onSelect={(date) => {
+          if (date) {
+            onDateSelect(date)
+          }
+        }}
+        disabled={(date) => {
+          const isBooked = bookedDates.some(
+            bookedDate => 
+              bookedDate.getFullYear() === date.getFullYear() &&
+              bookedDate.getMonth() === date.getMonth() &&
+              bookedDate.getDate() === date.getDate()
           )
-        })}
-      </div>
-
-      {/* {selectedDate && (
-        <div className="mt-6">
-          <h3 className="text-sm font-medium mb-3">Available Times</h3>
-          <div className="grid grid-cols-4 gap-2">
-            {['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'].map((time) => (
-              <button
-                key={time}
-                onClick={() => onDateSelect(selectedDate)}
-                className={cn(
-                  "py-2 px-4 text-sm rounded-lg border border-gray-200",
-                  "hover:border-blue-600 transition-colors",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                )}
-              >
-                {time}
-              </button>
-            ))}
-          </div>
-        </div>
-      )} */}
+          
+          const isDisabled = disabledDays ? disabledDays(date) : false
+          
+          return isBooked || isDisabled
+        }}
+        minDate={minDate}
+        maxDate={maxDate}
+        initialFocus
+        className="w-full"
+        classNames={{
+          months: "w-full space-y-4",
+          month: "space-y-4",
+          caption: "flex justify-center pt-1 relative items-center text-lg font-semibold",
+          caption_label: "text-lg font-semibold",
+          nav: "space-x-1 flex items-center",
+          nav_button: cn(
+            "h-9 w-9 bg-transparent p-0 opacity-50 hover:opacity-100 rounded-md",
+            "hover:bg-gray-100 transition-colors"
+          ),
+          nav_button_previous: "absolute left-1",
+          nav_button_next: "absolute right-1",
+          table: "w-full border-collapse space-y-1",
+          head_row: "flex w-full",
+          head_cell: cn(
+            "text-gray-500 rounded-md w-full font-medium text-[0.9rem]",
+            "first:text-red-500 last:text-red-500"
+          ),
+          row: "flex w-full mt-2",
+          cell: cn(
+            "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-rose-50",
+            "first:text-red-500 last:text-red-500 h-12 w-full"
+          ),
+          day: cn(
+            "h-12 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-md transition-colors",
+            "hover:bg-rose-100 aria-selected:bg-rose-600 aria-selected:text-white aria-selected:hover:bg-rose-600"
+          ),
+          day_today: "bg-gray-50 text-rose-600 font-semibold",
+          day_outside: "text-gray-400 opacity-50",
+          day_disabled: "text-gray-400 opacity-50 hover:bg-transparent",
+          day_range_middle: "aria-selected:bg-rose-50 aria-selected:text-rose-600",
+          day_hidden: "invisible",
+        }}
+      />
     </div>
   )
 }

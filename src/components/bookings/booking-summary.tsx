@@ -1,30 +1,53 @@
+'use client'
+
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Clock } from "lucide-react";
 
 interface BookingSummaryProps {
-  service: any;
+  service: {
+    name: string;
+    price: string;
+    duration: number;
+  };
   selectedDate: Date | null;
   selectedTime: string | null;
 }
 
 export function BookingSummary({ service, selectedDate, selectedTime }: BookingSummaryProps) {
-  if (!service) return null;
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 md:relative bg-white border-t md:border md:rounded-lg p-4 shadow-lg">
-      <div className="flex items-center justify-between">
+    <Card>
+      <CardHeader>
+        <CardTitle>Booking Summary</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div>
           <h3 className="font-medium">{service.name}</h3>
-          {selectedDate && selectedTime && (
-            <p className="text-sm text-gray-500">
-              {format(selectedDate, 'MMMM d, yyyy')} at {selectedTime}
-            </p>
-          )}
+          <p className="text-sm text-gray-500">{service.duration} minutes</p>
         </div>
-        <div className="text-xl font-bold text-rose-600">
-          {service.price && formatCurrency(parseFloat(service.price))}
+
+        {selectedDate && (
+          <div className="flex items-center text-sm text-gray-600">
+            <Calendar className="h-4 w-4 mr-2" />
+            {format(selectedDate, 'MMMM d, yyyy')}
+          </div>
+        )}
+
+        {selectedTime && (
+          <div className="flex items-center text-sm text-gray-600">
+            <Clock className="h-4 w-4 mr-2" />
+            {selectedTime}
+          </div>
+        )}
+
+        <div className="pt-4 border-t">
+          <div className="flex justify-between">
+            <span>Total</span>
+            <span className="font-medium">{formatCurrency(parseFloat(service.price))}</span>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 } 
