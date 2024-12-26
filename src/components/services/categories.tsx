@@ -1,49 +1,35 @@
 "use client"
 
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
+import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 const categories = [
-  { id: 'all', name: 'All Services', icon: '✨' },
-  { id: 'massage', name: 'Massage', icon: '💆' },
-  { id: 'hair', name: 'Hair', icon: '💇' },
-  { id: 'nails', name: 'Nails', icon: '💅' },
-  { id: 'facial', name: 'Facial', icon: '👩' },
-  { id: 'makeup', name: 'Makeup', icon: '💄' },
-  { id: 'spa', name: 'Spa', icon: '🧖' },
-  { id: 'body', name: 'Body', icon: '🧴' },
+  { id: 'hair', name: 'Hair' },
+  { id: 'nails', name: 'Nails' },
+  { id: 'makeup', name: 'Makeup' },
+  { id: 'skincare', name: 'Skincare' },
+  { id: 'massage', name: 'Massage' },
+  { id: 'spa', name: 'Spa' },
 ]
 
-export function Categories({ selectedCategory }: { selectedCategory?: string }) {
-  const router = useRouter()
+interface CategoriesProps {
+  selectedCategory?: string
+}
 
-  const handleCategoryClick = (categoryId: string) => {
-    const params = new URLSearchParams(window.location.search)
-    if (categoryId === 'all') {
-      params.delete('category')
-    } else {
-      params.set('category', categoryId)
-    }
-    router.push(`/services?${params.toString()}`);
-  }
-
+export function Categories({ selectedCategory }: CategoriesProps) {
   return (
     <div className="space-y-2">
       {categories.map((category) => (
-        <Button
+        <Link
           key={category.id}
-          variant="ghost"
+          href={`/services?category=${category.id}`}
           className={cn(
-            'w-full justify-start text-gray-600 hover:text-rose-600 hover:bg-rose-50',
-            selectedCategory === category.id && 'bg-rose-50 text-rose-600',
-            (!selectedCategory && category.id === 'all') && 'bg-rose-50 text-rose-600'
+            "block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors",
+            selectedCategory === category.id && "bg-rose-50 text-rose-600 hover:bg-rose-50"
           )}
-          onClick={() => handleCategoryClick(category.id)}
         >
-          <span className="mr-2">{category.icon}</span>
           {category.name}
-        </Button>
+        </Link>
       ))}
     </div>
   )
