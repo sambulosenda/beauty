@@ -23,6 +23,12 @@ const formatTime = (time: string) => {
 }
 
 export function BusinessContent({ business, services = [] }: BusinessContentProps) {
+  console.log('Business coordinates:', {
+    latitude: business.latitude,
+    longitude: business.longitude,
+    address: business.address
+  })
+
   const coverImage = business.gallery?.[0] || '/images/default-cover.jpg'
 
   const daysOfWeek = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
@@ -205,11 +211,7 @@ export function BusinessContent({ business, services = [] }: BusinessContentProp
               <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Location</h2>
                 <div className="h-[300px] rounded-xl overflow-hidden mb-4">
-                  <Map 
-                    address={business.address ?? ''}
-                    lat={Number(business.latitude)}
-                    lng={Number(business.longitude)}
-                  />
+                  <Map address={business.address ?? ''} />
                 </div>
                 <p className="text-gray-600 mb-2">{business.address}</p>
                 <Button variant="link" className="text-rose-600 p-0 h-auto">
