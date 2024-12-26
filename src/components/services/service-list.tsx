@@ -10,19 +10,21 @@ import {
 interface Service {
   id: string
   name: string
-  description: string | null
-  price: string
+  description?: string
+  price: number
   duration: number
   category: string
   image: string | null
 }
 
 interface ServiceListProps {
-  services: Service[]
+  services?: Service[]
   businessSlug: string
 }
 
-export function ServiceList({ services, businessSlug }: ServiceListProps) {
+export function ServiceList({ services = [], businessSlug }: ServiceListProps) {
+  console.log('ServiceList received services:', services)
+  
   const [openItems, setOpenItems] = useState<Set<string>>(new Set())
 
   const toggleItem = (id: string) => {
@@ -33,6 +35,14 @@ export function ServiceList({ services, businessSlug }: ServiceListProps) {
       newOpenItems.add(id)
     }
     setOpenItems(newOpenItems)
+  }
+
+  if (!Array.isArray(services) || services.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No services available at the moment.</p>
+      </div>
+    )
   }
 
   return (
