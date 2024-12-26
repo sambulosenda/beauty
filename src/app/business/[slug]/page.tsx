@@ -51,6 +51,8 @@ export default async function BusinessPage({ params }: { params: { slug: string 
       longitude: true,
       area: true,
       city: true,
+      rating: true,
+      reviewCount: true,
     }
   })
 
@@ -120,9 +122,9 @@ export default async function BusinessPage({ params }: { params: { slug: string 
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span>{business.rating || '5.0'}</span>
+                  <span>{business.rating}</span>
                   <span className="text-white/80">
-                    ({business.reviewCount || '6'} reviews)
+                    ({business.reviewCount} reviews)
                   </span>
                 </div>
                 {business.address && (
@@ -234,9 +236,9 @@ export default async function BusinessPage({ params }: { params: { slug: string 
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Location</h2>
                 <div className="h-[300px] rounded-xl overflow-hidden mb-4">
                   <Map 
-                    address={business.address}
-                    lat={business.latitude}
-                    lng={business.longitude}
+                    address={business.address ?? ''}
+                    lat={Number(business.latitude)}
+                    lng={Number(business.longitude)}
                   />
                 </div>
                 <p className="text-gray-600 mb-2">{business.address}</p>

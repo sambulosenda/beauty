@@ -22,6 +22,20 @@
       "when": 1734222567625,
       "tag": "0002_fantastic_wildside",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1735215153884,
+      "tag": "0003_modern_gravity",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1735216116846,
+      "tag": "0004_warm_thundra",
+      "breakpoints": true
     }
   ]
 }

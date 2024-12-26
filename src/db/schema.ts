@@ -41,6 +41,10 @@ export const users = pgTable('users', {
   stripeConnectAccountId: text('stripe_connect_account_id').unique(),
   stripeAccountEnabled: boolean('stripe_account_enabled').default(false),
   gallery: text('gallery').array(),
+  latitude: decimal('latitude', { precision: 10, scale: 8 }).notNull().default('51.5074'),
+  longitude: decimal('longitude', { precision: 11, scale: 8 }).notNull().default('-0.1278'),
+  rating: decimal('rating', { precision: 3, scale: 2 }).notNull().default('5.00'),
+  reviewCount: integer('review_count').notNull().default(0),
 })
 
 export const availability = pgTable('availability', {
