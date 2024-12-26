@@ -15,25 +15,38 @@ function useService(serviceId: string) {
   return useQuery({
     queryKey: ["service", serviceId],
     queryFn: async () => {
-      const [serviceResponse, availabilityResponse] = await Promise.all([
-        fetch(`/api/services/${serviceId}`),
-        fetch(`/api/availability/${serviceId}`)
-      ]);
+      console.log('Fetching service data for:', serviceId);
+      
+      // First fetch the service to get the providerId
+      const serviceResponse = await fetch(`/api/services/${serviceId}`);
+      const service = await serviceResponse.json();
+      
+      if (!service.providerId) {
+        throw new Error('Service provider ID not found');
+      }
 
-      const [service, availability] = await Promise.all([
-        serviceResponse.json(),
-        availabilityResponse.json()
-      ]);
+      // Then fetch availability using the providerId
+      const availabilityResponse = await fetch(`/api/availability/${service.providerId}`);
+      const availability = await availabilityResponse.json();
+
+      console.log('Raw availability data:', availability);
+      
+      const availableDays = Array.isArray(availability) 
+        ? availability
+            .filter((a: any) => a.isAvailable)
+            .map((a: any) => a.dayOfWeek)
+        : [];
+      
+      console.log('Filtered available days:', availableDays);
 
       return {
         ...service,
-        availableDays: availability
-          .filter((a: any) => a.isAvailable)
-          .map((a: any) => a.dayOfWeek),
+        availableDays,
       };
     },
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    gcTime: 1000 * 60 * 30, // Keep in cache for 30 minutes
+    staleTime: 0, // Disable stale time to always fetch fresh data
+    refetchOnMount: true, // Ensure data is refetched when component mounts
+    retry: 2, // Retry failed requests twice
   });
 }
 
@@ -188,17 +201,23 @@ export default function ServicePage({ params }: { params: { id: string } }) {
                   {/* Available Days */}
                   <div>
                     <h3 className="text-sm font-medium mb-2">Available Days</h3>
-                    <div className="grid grid-cols-3 gap-2">
-                      {service.availableDays?.map((day) => (
-                        <Badge
-                          key={day}
-                          variant="secondary"
-                          className="justify-center"
-                        >
-                          {day.slice(0, 3)}
-                        </Badge>
-                      ))}
-                    </div>
+                    {service.availableDays?.length > 0 ? (
+                      <div className="grid grid-cols-3 gap-2">
+                        {service.availableDays.map((day) => (
+                          <Badge
+                            key={day}
+                            variant="secondary"
+                            className="justify-center"
+                          >
+                            {day.slice(0, 3)}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-500">
+                        No available days set for this service. Please contact the provider.
+                      </div>
+                    )}
                   </div>
                   
                   <Link href={`/services/${params.id}/book`} className="block">
