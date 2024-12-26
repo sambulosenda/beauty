@@ -3,7 +3,8 @@
 import { useServices } from '@/hooks/queries/use-services'
 import { ServicesList } from './services-list'
 import { ServicesPageSkeleton } from './services-page-skeleton'
-import { useState, ReactNode } from 'react'
+import { useState, useCallback, ReactNode } from 'react'
+import { useDebounce } from '@/hooks/use-debounce'
 
 interface ServicesSectionProps {
   initialSearch?: string
@@ -24,25 +25,30 @@ export function ServicesSection({
     rating: null as number | null
   })
 
+  // Increase debounce delay to prevent rapid refetches
+  const debouncedFilters = useDebounce(filters, 800)
+
   const { data: services, isLoading, error } = useServices({
     search: initialSearch,
     location: initialLocation,
     category: initialCategory,
-    filters
+    filters: debouncedFilters
   })
 
-  const handleFilterChange = (type: string, value: any) => {
+  const handleFilterChange = useCallback((type: string, value: any) => {
     setFilters(prev => ({ ...prev, [type]: value }))
+  }, [])
+
+  // Show loading state only for initial load, not filter changes
+  if (isLoading && !services) return <ServicesPageSkeleton />
+  if (error) {
+    console.error('ServicesSection - Error:', error)
+    return <div>Error loading services</div>
   }
-
-  if (isLoading) return <ServicesPageSkeleton />
-  if (error) return <div>Error loading services</div>
-
-  console.log('Search params:', { search: initialSearch, location: initialLocation })
 
   return (
     <>
-      {children(handleFilterChange)}
+
       <div className="lg:col-span-9">
         <ServicesList 
           initialServices={services || []}
