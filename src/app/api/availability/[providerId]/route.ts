@@ -14,10 +14,13 @@ export async function GET(
       .select({
         dayOfWeek: availability.dayOfWeek,
         isAvailable: availability.isAvailable,
+        startTime: availability.startTime,
+        endTime: availability.endTime,
       })
       .from(availability)
       .where(eq(availability.providerId, resolvedParams.providerId));
 
+    console.log('Availability settings:', availabilitySettings);
     return NextResponse.json(availabilitySettings);
   } catch (error) {
     console.error("Error fetching availability:", error);
