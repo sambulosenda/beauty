@@ -13,48 +13,74 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import Map from '@/components/map'
 
-const businessHours = [
-  { day: 'Monday', open: '9:00 AM', close: '6:00 PM', isClosed: false },
-  { day: 'Tuesday', open: '9:00 AM', close: '6:00 PM', isClosed: false },
-  { day: 'Wednesday', open: '9:00 AM', close: '6:00 PM', isClosed: false },
-  { day: 'Thursday', open: '9:00 AM', close: '6:00 PM', isClosed: false },
-  { day: 'Friday', open: '9:00 AM', close: '6:00 PM', isClosed: false },
-  { day: 'Saturday', open: '10:00 AM', close: '4:00 PM', isClosed: false },
-  { day: 'Sunday', open: '', close: '', isClosed: true },
-]
+// Helper function to format time
+const formatTime = (time: string) => {
+  return new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true
+  })
+}
 
-const availableSlots = [
-  '10:00 AM',
-  '11:30 AM',
-  '2:00 PM',
-  '3:30 PM',
-  '5:00 PM'
-]
+interface BusinessWithAvailability {
+  id: string
+  name: string | null
+  slug: string | null
+  clerkId: string
+  role: "CUSTOMER" | "PROVIDER" | "ADMIN"
+  email: string
+  businessName: string | null
+  description: string | null
+  address: string | null
+  phone: string | null
+  logo: string | null
+  gallery: string[] | null
+  latitude: string
+  longitude: string
+  rating: string
+  reviewCount: number
+  availability: {
+    dayOfWeek: string
+    startTime: string
+    endTime: string
+    isAvailable: boolean
+  }[]
+}
 
 export default async function BusinessPage({ params }: { params: { slug: string } }) {
   const slug = await params.slug
   
-  const business = await db.query.users.findFirst({
+  const business = (await db.query.users.findFirst({
     where: eq(users.slug, slug),
     columns: {
       id: true,
       name: true,
+      slug: true,
+      clerkId: true,
+      role: true,
+      email: true,
       businessName: true,
       description: true,
-      logo: true,
-      role: true,
       address: true,
       phone: true,
-      email: true,
+      logo: true,
       gallery: true,
       latitude: true,
       longitude: true,
-      area: true,
-      city: true,
       rating: true,
       reviewCount: true,
+    },
+    with: {
+      availability: {
+        columns: {
+          dayOfWeek: true,
+          startTime: true,
+          endTime: true,
+          isAvailable: true
+        }
+      }
     }
-  })
+  })) as BusinessWithAvailability;
 
   if (!business || business.role !== 'PROVIDER') {
     notFound()
@@ -65,6 +91,19 @@ export default async function BusinessPage({ params }: { params: { slug: string 
 
   const businessServices = await db.query.services.findMany({
     where: eq(services.providerId, business.id),
+  })
+
+  // Replace the hardcoded opening hours array with:
+  const daysOfWeek = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
+  const openingHours = daysOfWeek.map(day => {
+    const schedule = business.availability?.find(a => a.dayOfWeek === day)
+    return {
+      day: day.charAt(0) + day.slice(1).toLowerCase(),
+      hours: schedule?.isAvailable 
+        ? `${formatTime(schedule.startTime)} - ${formatTime(schedule.endTime)}`
+        : 'Closed',
+      isOpen: schedule?.isAvailable ?? false
+    }
   })
 
   return (
@@ -251,15 +290,7 @@ export default async function BusinessPage({ params }: { params: { slug: string 
               <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Opening Hours</h2>
                 <div className="space-y-3">
-                  {[
-                    { day: 'Monday', hours: '10:00 - 18:00', isOpen: true },
-                    { day: 'Tuesday', hours: '10:00 - 18:00', isOpen: true },
-                    { day: 'Wednesday', hours: '10:00 - 18:00', isOpen: true },
-                    { day: 'Thursday', hours: '10:00 - 18:00', isOpen: true },
-                    { day: 'Friday', hours: '10:00 - 18:00', isOpen: true },
-                    { day: 'Saturday', hours: '10:00 - 16:00', isOpen: true },
-                    { day: 'Sunday', hours: 'Closed', isOpen: false },
-                  ].map((schedule) => (
+                  {openingHours.map((schedule) => (
                     <div 
                       key={schedule.day}
                       className="flex items-center justify-between py-2"

@@ -125,7 +125,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   providerBookings: many(bookings, { relationName: 'bookingProvider' }),
   customerBookings: many(bookings, { relationName: 'bookingCustomer' }),
   providerReviews: many(reviews, { relationName: 'reviewProvider' }),
-  customerReviews: many(reviews, { relationName: 'reviewCustomer' })
+  customerReviews: many(reviews, { relationName: 'reviewCustomer' }),
+  availability: many(availability)
 }))
 
 export const servicesRelations = relations(services, ({ one }) => ({
@@ -172,7 +173,7 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
 export const availabilityRelations = relations(availability, ({ one }) => ({
   provider: one(users, {
     fields: [availability.providerId],
-    references: [users.id],
-  }),
+    references: [users.id]
+  })
 }))
 
