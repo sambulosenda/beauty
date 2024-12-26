@@ -11,8 +11,6 @@ export interface BusinessWithAvailability {
   phone: string | null
   logo: string | null
   gallery: string[] | null
-  latitude: string
-  longitude: string
   rating: string
   reviewCount: number
   availability: {
