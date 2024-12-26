@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Calendar } from '@/components/ui/calendar'
 import { DayPicker } from "react-day-picker"
 import { checkAvailability } from '@/lib/availability'
-import { CalendarIcon, Clock, CheckCircle2 } from 'lucide-react'
+import { CalendarIcon, Clock, CheckCircle2, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PaymentWrapper } from '@/components/payments/payment-wrapper'
@@ -23,9 +23,18 @@ interface BookingFormProps {
   selectedTime: string | null;
   setSelectedTime: (time: string | null) => void;
   onComplete: () => void;
+  onStripeStatusChange: () => void;
 }
 
-export default function BookingForm({ service, selectedDate, setSelectedDate, selectedTime, setSelectedTime, onComplete }: BookingFormProps) {
+export default function BookingForm({ 
+  service, 
+  selectedDate, 
+  selectedTime, 
+  setSelectedDate, 
+  setSelectedTime, 
+  onComplete,
+  onStripeStatusChange 
+}: BookingFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { user, isSignedIn } = useUser()
@@ -33,6 +42,22 @@ export default function BookingForm({ service, selectedDate, setSelectedDate, se
   const [showPayment, setShowPayment] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
   const [bookedDates, setBookedDates] = useState<Date[]>([])
+  const [providerStripeStatus, setProviderStripeStatus] = useState<{
+    isConnected: boolean;
+    accountEnabled: boolean;
+  } | null>(null)
+  const [isCheckingStripe, setIsCheckingStripe] = useState(true)
+
+  // Reset form state when provider changes
+  useEffect(() => {
+    setError(null)
+    setShowPayment(false)
+    setBookingId(null)
+    setBookedDates([])
+    setProviderStripeStatus(null)
+    setIsCheckingStripe(true)
+    setIsLoading(false)
+  }, [service.providerId])
 
   useEffect(() => {
     async function fetchBookedDates() {
@@ -47,6 +72,26 @@ export default function BookingForm({ service, selectedDate, setSelectedDate, se
 
     fetchBookedDates()
   }, [service.providerId])
+
+  useEffect(() => {
+    async function checkProviderStripeStatus() {
+      setIsCheckingStripe(true);
+      try {
+        const response = await fetch(`/api/providers/${service.providerId}/stripe-status`);
+        const data = await response.json();
+        setProviderStripeStatus(data);
+      } catch (error) {
+        console.error('Error checking provider stripe status:', error);
+        setError('Unable to verify payment setup');
+      } finally {
+        setIsCheckingStripe(false);
+      }
+    }
+
+    checkProviderStripeStatus();
+  }, [service.providerId]);
+
+  const isProviderStripeReady = providerStripeStatus?.isConnected && providerStripeStatus?.accountEnabled;
 
   const handleDateChange = (date: Date | null) => {
     setError(null)
@@ -86,8 +131,30 @@ export default function BookingForm({ service, selectedDate, setSelectedDate, se
 
     try {
       setIsLoading(true);
-      // Instead of creating the booking here, move to payment step
-      onComplete();
+      
+      // Create payment intent first
+      const response = await fetch('/api/payments/create-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: parseFloat(service.price) * 100,
+          currency: 'gbp',
+          serviceId: service.id,
+          date: selectedDate,
+          time: selectedTime,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setBookingId(data.id);
+      setShowPayment(true);
     } catch (error) {
       console.error('Booking error:', error)
       setError('Failed to process booking. Please try again.')
@@ -122,8 +189,13 @@ export default function BookingForm({ service, selectedDate, setSelectedDate, se
   if (showPayment && bookingId) {
     return (
       <PaymentWrapper
-        bookingId={bookingId}
         amount={parseFloat(service.price)}
+        onSuccess={() => {}}
+        bookingDetails={{
+          service,
+          date: selectedDate,
+          time: selectedTime
+        }}
       />
     )
   }
@@ -141,16 +213,32 @@ export default function BookingForm({ service, selectedDate, setSelectedDate, se
         
         <Button 
           type="submit" 
-          disabled={isLoading || !selectedDate || !selectedTime}
+          disabled={
+            !selectedDate || 
+            !selectedTime || 
+            isLoading || 
+            isCheckingStripe || 
+            !isProviderStripeReady
+          }
           className="w-full"
         >
-          {isLoading ? 'Processing...' : 'Confirm Booking'}
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : isCheckingStripe ? (
+            'Checking availability...'
+          ) : !isProviderStripeReady ? (
+            'Provider not available'
+          ) : (
+            'Book Now'
+          )}
         </Button>
       </div>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+      {!isCheckingStripe && !isProviderStripeReady && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>
+            This provider is not yet setup to accept bookings. Please try again later.
+          </AlertDescription>
         </Alert>
       )}
     </form>

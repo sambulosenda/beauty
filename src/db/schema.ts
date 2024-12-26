@@ -171,3 +171,4 @@ export const availabilityRelations = relations(availability, ({ one }) => ({
     references: [users.id],
   }),
 }))
+

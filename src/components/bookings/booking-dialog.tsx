@@ -1,7 +1,8 @@
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import BookingSteps from "./booking-steps"
+import { X } from "lucide-react"
 
 interface BookingDialogProps {
   serviceId: string
@@ -17,11 +18,19 @@ export default function BookingDialog({ serviceId }: BookingDialogProps) {
           Book Now
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogTitle className="text-xl font-semibold mb-4">
-          Book Appointment
-        </DialogTitle>
-        <BookingSteps serviceId={serviceId} onComplete={() => setOpen(false)} />
+      <DialogContent className="sm:max-w-[600px] p-0">
+        <div className="flex justify-between items-center p-6 border-b">
+          <h2 className="text-xl font-semibold">Book Appointment</h2>
+          <button 
+            onClick={() => setOpen(false)}
+            className="rounded-full p-1 hover:bg-gray-100"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="p-6">
+          <BookingSteps serviceId={serviceId} onComplete={() => setOpen(false)} />
+        </div>
       </DialogContent>
     </Dialog>
   )

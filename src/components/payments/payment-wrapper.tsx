@@ -3,7 +3,7 @@
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentForm } from './payment-form';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -12,52 +12,45 @@ interface PaymentWrapperProps {
   amount: number;
   onSuccess: (paymentIntentId: string) => void;
   bookingDetails: {
+    service: any;
     date: Date | null;
     time: string | null;
-    service: any;
   };
 }
 
 export function PaymentWrapper({ amount, onSuccess, bookingDetails }: PaymentWrapperProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const createPaymentIntent = useCallback(async () => {
-    if (isLoading || clientSecret) return;
-
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/payments/create-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          serviceId: bookingDetails.service.id,
-          providerId: bookingDetails.service.providerId,
-          date: bookingDetails.date,
-          time: bookingDetails.time
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create payment');
-      }
-
-      console.log('Payment intent created successfully');
-      setClientSecret(data.clientSecret);
-    } catch (err) {
-      console.error('Payment setup error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to setup payment');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [amount, bookingDetails, clientSecret, isLoading]);
 
   useEffect(() => {
-    createPaymentIntent();
-  }, [createPaymentIntent]);
+    fetch('/api/payments/create-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount,
+        serviceId: bookingDetails.service.id,
+        providerId: bookingDetails.service.providerId,
+        date: bookingDetails.date,
+        time: bookingDetails.time
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to create payment');
+        }
+        return data;
+      })
+      .then((data) => setClientSecret(data.clientSecret))
+      .catch((err) => {
+        console.error('Payment setup error:', err);
+        setError(err.message);
+      });
+  }, [amount, bookingDetails]);
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    onSuccess(paymentIntentId);
+  };
 
   if (error) {
     return (
@@ -87,7 +80,7 @@ export function PaymentWrapper({ amount, onSuccess, bookingDetails }: PaymentWra
       >
         <PaymentForm
           amount={amount}
-          onSuccess={onSuccess}
+          onSuccess={handlePaymentSuccess}
           bookingDetails={bookingDetails}
         />
       </Elements>
