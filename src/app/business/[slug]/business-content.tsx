@@ -23,11 +23,20 @@ const formatTime = (time: string) => {
 }
 
 export function BusinessContent({ business, services = [] }: BusinessContentProps) {
-  console.log('Business coordinates:', {
-    latitude: business.latitude,
-    longitude: business.longitude,
-    address: business.address
-  })
+  const businessUrl = `${window.location.origin}/business/${business.slug}`
+
+  function shareBusiness() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Check out this business!',
+        url: businessUrl,
+      })
+      .then(() => console.log('Successful share'))
+      .catch((error) => console.log('Error sharing', error));
+    } else {
+      alert('Copy this link to share: ' + businessUrl);
+    }
+  }
 
   const coverImage = business.gallery?.[0] || '/images/default-cover.jpg'
 
@@ -112,7 +121,12 @@ export function BusinessContent({ business, services = [] }: BusinessContentProp
             </div>
             
             <div className="flex items-center gap-3">
-              <Button size="sm" variant="outline" className="bg-white/10 border-white/20">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="bg-white/10 border-white/20"
+                onClick={shareBusiness}
+              >
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
