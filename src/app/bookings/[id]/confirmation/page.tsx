@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Check, X } from 'lucide-react';
+import React from 'react'
 
 export default function BookingConfirmationPage() {
   const searchParams = useSearchParams();

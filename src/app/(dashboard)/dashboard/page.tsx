@@ -5,6 +5,7 @@ import { users } from '@/db/schema'
 import { currentUser } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { DashboardStats } from '@/components/dashboard/stats'
+import React from 'react'
 
 export default async function DashboardPage() {
   const user = await currentUser()

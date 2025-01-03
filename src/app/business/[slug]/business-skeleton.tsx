@@ -1,3 +1,5 @@
+import React from 'react'
+
 export function BusinessSkeletonLoader() {
   return (
     <div className="min-h-screen bg-gray-50 animate-pulse">

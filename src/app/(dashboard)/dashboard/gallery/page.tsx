@@ -4,6 +4,7 @@ import { GalleryClient } from './gallery-client'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
+import React from 'react'
 
 export default async function GalleryPage() {
   const { userId } = await auth()

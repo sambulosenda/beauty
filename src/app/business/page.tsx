@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle, ArrowRight, Star, Users, Calendar, Zap } from 'lucide-react'
 import { Metadata } from 'next'
+import React from 'react'
 
 export const metadata: Metadata = {
   title: 'List Your Beauty Business | AfroGlow',

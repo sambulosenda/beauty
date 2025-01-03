@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { DashboardNav } from '@/components/dashboard/nav'
+import React from 'react'
 
 export default async function DashboardLayout({
   children,

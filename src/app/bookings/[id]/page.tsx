@@ -7,8 +7,8 @@ import { Metadata } from 'next'
 import { ReviewForm } from '@/components/reviews/review-form'
 import { ReviewsList } from '@/components/reviews/reviews-list'
 import { Clock, MapPin, Calendar, CheckCircle2, AlertCircle } from 'lucide-react'
-import { BookingStatusUpdate } from '@/components/bookings/booking-status-update'
 import { ClientBookingStatus } from '@/components/bookings/client-booking-status'
+import React from 'react'
 
 export async function generateMetadata(props: { params: { id: string } }): Promise<Metadata> {
   const booking = await getBookingById(props.params.id)

@@ -1,33 +1,42 @@
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
-import { db } from '@/db'
-import { users } from '@/db/schema'
-import { eq } from 'drizzle-orm'
-import { StripeConnectButton } from '@/components/payments/stripe-connect-button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { stripe } from "@/lib/stripe"
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { StripeConnectButton } from "@/components/payments/stripe-connect-button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { stripe } from "@/lib/stripe";
+import React from "react";
 
 export default async function SettingsPage() {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
 
   const user = await db.query.users.findFirst({
     where: eq(users.clerkId, userId),
-  })
+  });
 
-  if (!user) redirect('/')
+  if (!user) redirect("/");
 
   // Get Stripe account status
-  let isConnected = false
-  let accountEnabled = false
-  
+  let isConnected = false;
+  let accountEnabled = false;
+
   if (user.stripeConnectAccountId) {
     try {
-      const account = await stripe.accounts.retrieve(user.stripeConnectAccountId)
-      isConnected = true
-      accountEnabled = account.charges_enabled && account.details_submitted
+      const account = await stripe.accounts.retrieve(
+        user.stripeConnectAccountId
+      );
+      isConnected = true;
+      accountEnabled = account.charges_enabled && account.details_submitted;
     } catch (error) {
-      console.error('Error fetching Stripe account:', error)
+      console.error("Error fetching Stripe account:", error);
     }
   }
 
@@ -37,22 +46,20 @@ export default async function SettingsPage() {
         <CardHeader>
           <CardTitle>Payment Settings</CardTitle>
           <CardDescription>
-            {!isConnected 
-              ? 'Connect your Stripe account to start accepting payments'
-              : !accountEnabled 
-                ? 'Complete your Stripe account setup to start accepting payments'
-                : 'Your Stripe account is fully configured'
-            }
+            {!isConnected
+              ? "Connect your Stripe account to start accepting payments"
+              : !accountEnabled
+              ? "Complete your Stripe account setup to start accepting payments"
+              : "Your Stripe account is fully configured"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <StripeConnectButton 
-            isConnected={isConnected} 
-            accountEnabled={accountEnabled} 
+          <StripeConnectButton
+            isConnected={isConnected}
+            accountEnabled={accountEnabled}
           />
         </CardContent>
       </Card>
     </div>
-  )
-} 
-
+  );
+}

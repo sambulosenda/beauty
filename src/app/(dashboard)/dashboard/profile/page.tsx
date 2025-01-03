@@ -5,6 +5,7 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { EditProfileForm } from './edit-profile-form'
+import React from 'react'
 
 export default async function ProfilePage() {
   const { userId } = await auth()

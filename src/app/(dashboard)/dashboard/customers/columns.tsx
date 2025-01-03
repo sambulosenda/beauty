@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
@@ -46,15 +47,17 @@ export const columns: ColumnDef<Customer>[] = [
       if (!lastBooking) return 'No bookings'
       
       return (
-        <Badge variant={
-          lastBooking.status === 'COMPLETED' ? 'default' :
-          lastBooking.status === 'CONFIRMED' ? 'outline' :
-          lastBooking.status === 'CANCELLED' ? 'destructive' :
-          'secondary'
-        }>
+        <Badge 
+          variant={
+            lastBooking.status === 'COMPLETED' ? 'default' :
+            lastBooking.status === 'CONFIRMED' ? 'outline' :
+            lastBooking.status === 'CANCELLED' ? 'destructive' :
+            'secondary'
+          }
+        >
           {lastBooking.status}
         </Badge>
       )
     },
   },
-] 
+]

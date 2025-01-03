@@ -1,21 +1,21 @@
 // app/dashboard/services/columns.tsx
-"use client"
+"use client";
 
-import { ColumnDef } from "@tanstack/react-table"
-import { formatCurrency } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash } from "lucide-react"
+import { ColumnDef } from "@tanstack/react-table";
+import { formatCurrency } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Service } from "../../../../../types"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+} from "@/components/ui/dropdown-menu";
+import { Service } from "../../../../../types";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import React from "react";
 
 export const columns: ColumnDef<Service>[] = [
   {
@@ -29,7 +29,7 @@ export const columns: ColumnDef<Service>[] = [
           Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
-      )
+      );
     },
   },
   {
@@ -44,39 +44,39 @@ export const columns: ColumnDef<Service>[] = [
     accessorKey: "price",
     header: "Price",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("price"))
-      return formatCurrency(amount)
+      const amount = parseFloat(row.getValue("price"));
+      return formatCurrency(amount);
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const service = row.original
-      const { toast } = useToast()
-      const router = useRouter()
+      const service = row.original;
+      const { toast } = useToast();
+      const router = useRouter();
 
       const deleteService = async (id: string) => {
         try {
           const response = await fetch(`/api/services/${id}`, {
-            method: 'DELETE',
-          })
+            method: "DELETE",
+          });
 
-          if (!response.ok) throw new Error('Failed to delete service')
+          if (!response.ok) throw new Error("Failed to delete service");
 
           toast({
             title: "Success",
             description: "Service deleted successfully",
-          })
-          
-          router.refresh()
-        } catch (error) {
+          });
+
+          router.refresh();
+        } catch {
           toast({
             title: "Error",
             description: "Failed to delete service",
             variant: "destructive",
-          })
+          });
         }
-      }
+      };
 
       return (
         <DropdownMenu>
@@ -95,8 +95,12 @@ export const columns: ColumnDef<Service>[] = [
             </Link>
             <DropdownMenuItem
               onClick={() => {
-                if (window.confirm("Are you sure you want to delete this service?")) {
-                  deleteService(service.id)
+                if (
+                  window.confirm(
+                    "Are you sure you want to delete this service?"
+                  )
+                ) {
+                  deleteService(service.id);
                 }
               }}
               className="text-red-600"
@@ -106,7 +110,7 @@ export const columns: ColumnDef<Service>[] = [
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      )
+      );
     },
   },
-]
+];

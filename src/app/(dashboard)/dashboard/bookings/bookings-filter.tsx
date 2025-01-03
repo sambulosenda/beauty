@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -23,12 +24,12 @@ export function BookingsFilter({ initialStatus = [] }: BookingsFilterProps) {
   const router = useRouter()
   const [status, setStatus] = useState<StatusType[]>(initialStatus as StatusType[])
 
-  const handleStatusChange = (value: string) => {
-    // setStatus((prev) =>
-    //   prev.includes(value)
-    //     ? prev.filter((item) => item !== value)
-    //     : [...prev, value]
-    // )
+  const handleStatusChange = (value: StatusType) => {
+    setStatus((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value]
+    )
   }
 
   const applyFilters = () => {
@@ -74,4 +75,3 @@ export function BookingsFilter({ initialStatus = [] }: BookingsFilterProps) {
     </DropdownMenu>
   )
 }
-

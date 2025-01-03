@@ -1,19 +1,22 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Calendar } from '@/components/ui/calendar'
-import { addDays, format, isToday } from 'date-fns'
-import { DayBookings } from './day-bookings'
+import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Calendar } from "@/components/ui/calendar";
+import { isToday } from "date-fns";
+import { DayBookings } from "./day-bookings";
+import React from "react";
 
 interface CalendarViewProps {
   providerId: string;
 }
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 export function CalendarView({ providerId }: CalendarViewProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -37,16 +40,12 @@ export function CalendarView({ providerId }: CalendarViewProps) {
 
         <div className="bg-white rounded-lg shadow p-6">
           {selectedDate ? (
-            <DayBookings 
-              date={selectedDate} 
-              providerId={providerId}
-            />
+            <DayBookings date={selectedDate} providerId={providerId} />
           ) : (
             <p className="text-gray-500">Select a date to view bookings</p>
           )}
         </div>
       </div>
     </QueryClientProvider>
-  )
+  );
 }
-

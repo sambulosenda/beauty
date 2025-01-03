@@ -1,17 +1,18 @@
-'use client'
+"use client";
 
-import { BusinessGallery } from '@/components/business/business-gallery'
+import { BusinessGallery } from "@/components/business/business-gallery";
+import React from "react";
 
 interface BusinessGalleryClientProps {
-  images: string[]
+  images: string[];
 }
 
 export function BusinessGalleryClient({ images }: BusinessGalleryClientProps) {
   return (
-    <BusinessGallery 
-      images={images} 
+    <BusinessGallery
+      images={images}
       onUpdate={async () => {}}
       isEditing={false}
     />
-  )
-} 
+  );
+}

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowRight, Heart, Shield, Users, Clock, Star } from 'lucide-react'
+import React from 'react'
 
 export const metadata: Metadata = {
   title: 'About Us | BeautyBook',

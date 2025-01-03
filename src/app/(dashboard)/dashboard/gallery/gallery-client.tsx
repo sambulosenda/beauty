@@ -3,6 +3,7 @@
 import { BusinessGallery } from '@/components/business/business-gallery'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import React from 'react'
 
 interface GalleryClientProps {
   initialGallery: string[]
