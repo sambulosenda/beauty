@@ -14,6 +14,8 @@ export default function Home() {
   const [location, setLocation] = useState("");
   const { data, isLoading, error } = useProviders();
 
+  console.log(data)
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log({ treatment, location });

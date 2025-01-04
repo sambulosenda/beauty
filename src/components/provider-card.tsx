@@ -2,8 +2,8 @@ import Image from "next/image";
 import { Star, MapPin } from 'lucide-react';
 import { Provider } from "@/types/provider";
 import Link from "next/link";
-import React
- from "react";
+import React from "react";
+
 interface ProviderCardProps {
   provider: Provider;
   index: number;
@@ -13,7 +13,7 @@ interface ProviderCardProps {
 export function ProviderCard({ provider, index, isNew = false }: ProviderCardProps) {
   return (
     <div 
-      className="h-full opacity-0 translate-y-5 animate-fade-in"
+      className="h-full"
       style={{ 
         animationDelay: `${index * 100}ms`,
         animationFillMode: 'forwards' 
