@@ -1,16 +1,10 @@
 'use client'
 
 import Link from "next/link"
-import { motion } from "framer-motion"
-
+import React from "react"
 export function Footer() {
   return (
-    <motion.footer 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="border-t border-gray-100 bg-gradient-to-r from-rose-100 via-white to-rose-100 backdrop-blur-sm"
-    >
+    <footer className="border-t border-gray-100 bg-gradient-to-r from-rose-100 via-white to-rose-100 backdrop-blur-sm">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-12">
           {/* Footer Grid */}
@@ -119,6 +113,6 @@ export function Footer() {
           </div>
         </div>
       </div>
-    </motion.footer>
+    </footer>
   )
-} 
+}

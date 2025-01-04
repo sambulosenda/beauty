@@ -1,16 +1,18 @@
 // app/api/bookings/[id]/status/route.ts
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
-import { bookings, users } from '@/db/schema'
+import { bookings } from '@/db/schema'
 import { currentUser } from '@clerk/nextjs/server'
 import { eq } from 'drizzle-orm'
 import { sendBookingUpdate } from '@/lib/emails'
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     const user = await currentUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -21,7 +23,7 @@ export async function PATCH(
 
     // Verify the booking
     const booking = await db.query.bookings.findFirst({
-      where: eq(bookings.id, params.id),
+      where: eq(bookings.id, id),
       with: {
         customer: true,
         service: true,
@@ -36,11 +38,11 @@ export async function PATCH(
     // Update booking status
     const [updatedBooking] = await db
       .update(bookings)
-      .set({ 
+      .set({
         status,
         updatedAt: new Date()
       })
-      .where(eq(bookings.id, params.id))
+      .where(eq(bookings.id, id))
       .returning()
 
     // Send email notification

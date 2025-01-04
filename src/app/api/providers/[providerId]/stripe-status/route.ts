@@ -6,14 +6,17 @@ import { eq } from 'drizzle-orm'
 
 export async function GET(
   request: Request,
-  { params }: { params: { providerId: string } }
+  { params }: { params: Promise<{ providerId: string }> }
 ) {
   try {
+    // Await the params to get the providerId
+    const { providerId } = await params
+
     // Get the provider's stripe account ID from the database
     const [provider] = await db
       .select({ stripe_account_id: users.stripeConnectAccountId })
       .from(users)
-      .where(eq(users.id, params.providerId))
+      .where(eq(users.id, providerId))
       .execute();
 
     if (!provider?.stripe_account_id) {
@@ -34,10 +37,10 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error checkig stripe status:", error);
+    console.error("Error checking stripe status:", error);
     return NextResponse.json(
       { error: "Failed to check provider stripe status" },
       { status: 500 }
     );
   }
-} 
+}

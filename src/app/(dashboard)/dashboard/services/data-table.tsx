@@ -1,6 +1,5 @@
 // app/dashboard/services/data-table.tsx
 "use client";
-
 import {
   ColumnDef,
   flexRender,

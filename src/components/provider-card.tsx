@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { Star, MapPin } from 'lucide-react';
-import { motion } from "framer-motion";
 import { Provider } from "@/types/provider";
 import Link from "next/link";
-
+import React
+ from "react";
 interface ProviderCardProps {
   provider: Provider;
   index: number;
@@ -12,11 +12,12 @@ interface ProviderCardProps {
 
 export function ProviderCard({ provider, index, isNew = false }: ProviderCardProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="h-full"
+    <div 
+      className="h-full opacity-0 translate-y-5 animate-fade-in"
+      style={{ 
+        animationDelay: `${index * 100}ms`,
+        animationFillMode: 'forwards' 
+      }}
     >
       <Link href={`/business/${provider.slug || provider.id}`}>
         <div className="group cursor-pointer h-full bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:border-gray-300">
@@ -36,7 +37,6 @@ export function ProviderCard({ provider, index, isNew = false }: ProviderCardPro
               loading="lazy"
             />
           </div>
-
           <div className="p-5 space-y-3">
             <h3 className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
               {provider.businessName || provider.name}
@@ -67,6 +67,6 @@ export function ProviderCard({ provider, index, isNew = false }: ProviderCardPro
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
-} 
+}

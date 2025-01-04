@@ -8,18 +8,17 @@ import { BookingsStats } from "./bookings-stats";
 import { ErrorBoundary } from '@/components/error-boundary';
 import { BookingsClient } from './bookings-client';
 import React from 'react';
-
-// Define the page props interface
+// Update the interface to reflect searchParams as a Promise
 interface SearchParams {
   status?: string;
   page?: string;
 }
 
 interface PageProps {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;  // Changed this line
 }
 
-const parseStatus = (status: string | undefined) => 
+const parseStatus = (status: string | undefined) =>
   status ? status.split(',') : undefined;
 
 const parsePage = (page: string | undefined) => {
@@ -28,8 +27,10 @@ const parsePage = (page: string | undefined) => {
 };
 
 export default async function BookingsPage({ searchParams }: PageProps) {
+  // Await the searchParams
+  const params = await searchParams;
+  
   const { userId } = await auth();
- 
   if (!userId) {
     redirect("/sign-in");
   }
@@ -49,18 +50,16 @@ export default async function BookingsPage({ searchParams }: PageProps) {
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
       </div>
-     
       <ErrorBoundary fallback={<div>Error loading stats. Please try again later.</div>}>
         <Suspense fallback={<div>Loading stats...</div>}>
           <BookingsStats userId={dbUser.id} userRole={dbUser.role} />
         </Suspense>
       </ErrorBoundary>
-
       <ErrorBoundary fallback={<div>Error loading bookings. Please try again later.</div>}>
         <Suspense fallback={<div>Loading bookings...</div>}>
           <BookingsClient
-            initialStatus={parseStatus(searchParams.status)}
-            initialPage={parsePage(searchParams.page)}
+            initialStatus={parseStatus(params.status)}  // Use params instead of searchParams
+            initialPage={parsePage(params.page)}        // Use params instead of searchParams
           />
         </Suspense>
       </ErrorBoundary>

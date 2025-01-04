@@ -5,11 +5,14 @@ import { eq } from 'drizzle-orm'
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    // Await the params to get the slug
+    const { slug } = await params
+    
     const business = await db.query.users.findFirst({
-      where: eq(users.slug, params.slug),
+      where: eq(users.slug, slug),
       columns: {
         id: true,
         name: true,
@@ -23,8 +26,6 @@ export async function GET(
         phone: true,
         logo: true,
         gallery: true,
-        latitude: true,
-        longitude: true,
         rating: true,
         reviewCount: true,
       },
@@ -42,7 +43,7 @@ export async function GET(
 
     if (!business || business.role !== 'PROVIDER') {
       return NextResponse.json(
-        { error: 'Business not found' }, 
+        { error: 'Business not found' },
         { status: 404 }
       )
     }

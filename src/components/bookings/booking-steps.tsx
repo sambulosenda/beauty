@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { PaymentWrapper } from '../payments/payment-wrapper'
 import { BookingSummary } from './booking-summary'
 import { cn } from '@/lib/utils'
-
+import React  from 'react'
 interface BookingStepsProps {
   serviceId: string
   onComplete?: () => void
@@ -181,8 +181,8 @@ export default function BookingSteps({ serviceId, onComplete }: BookingStepsProp
                   selectedDate={selectedDate}
                   onDateSelect={handleDateSelect}
                   bookedDates={[]}
-                  minDate={new Date()}
-                  maxDate={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
+                  fromDate={new Date()}
+                  toDate={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)}
                 />
                 {selectedDate && (
                   <div className="grid grid-cols-4 gap-2">
@@ -210,6 +210,7 @@ export default function BookingSteps({ serviceId, onComplete }: BookingStepsProp
             setSelectedDate={setSelectedDate}
             setSelectedTime={setSelectedTime}
             onComplete={handleFormComplete}
+            onStripeStatusChange={(status) => setProviderStripeStatus(status)}
           />
         )}
 

@@ -11,11 +11,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Service } from "../../../../../types";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import React from "react";
+
+interface Service {
+  id: string;
+  name: string;
+  price: string;
+  duration: number;
+  category: string;
+  description: string | null;
+  image: string | null;
+  providerId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  provider: {
+    name: string | null;
+    businessName: string | null;
+  };
+}
 
 export const columns: ColumnDef<Service>[] = [
   {

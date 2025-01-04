@@ -5,31 +5,37 @@ import { NavbarAuth } from "./navbar-auth"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Search } from 'lucide-react'
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { DesktopNav } from "./desktop-nav"
 import { MobileNav } from "./mobile-nav"
-import { motion } from "framer-motion"
-import { useScroll } from "framer-motion"
-import { useMotionValueEvent } from "framer-motion"
+import React from "react"
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const { scrollY } = useScroll()
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    setIsScrolled(latest > 0)
-  })
+  // Replace Framer Motion scroll detection with standard scroll listener
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    
+    // Check initial scroll position
+    handleScroll()
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
 
   return (
-    <motion.nav
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+    <nav
       className={cn(
         "sticky top-0 z-50 w-full",
-        isScrolled 
-          ? "bg-white/95 backdrop-blur-md border-b border-gray-200" 
+        isScrolled
+          ? "bg-white/95 backdrop-blur-md border-b border-gray-200"
           : "bg-white border-b border-gray-200",
         "font-outfit"
       )}
@@ -72,7 +78,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-    </motion.nav>
+    </nav>
   )
 }
-

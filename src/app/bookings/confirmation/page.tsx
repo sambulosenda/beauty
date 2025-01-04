@@ -1,37 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import React from 'react'
-
-export default function BookingConfirmationPage() {
+import React  from 'react';
+function BookingConfirmationContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [status, setStatus] = useState<'success' | 'error' | 'loading'>('loading');
-
-  useEffect(() => {
-    const redirectStatus = searchParams.get('redirect_status');
-
-    if (redirectStatus === 'succeeded') {
-      setStatus('success');
-    } else {
-      setStatus('error');
-    }
-  }, [searchParams]);
+  const redirectStatus = searchParams.get('redirect_status');
+  const status = redirectStatus === 'succeeded' ? 'success' : 'error';
 
   const handleReturn = () => {
     router.push('/dashboard');
   };
-
-  if (status === 'loading') {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -56,5 +38,19 @@ export default function BookingConfirmationPage() {
         <Button onClick={handleReturn}>Return to Dashboard</Button>
       </div>
     </div>
+  );
+}
+
+export default function BookingConfirmationPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      }
+    >
+      <BookingConfirmationContent />
+    </Suspense>
   );
 } 

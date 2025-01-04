@@ -17,10 +17,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Map from "@/components/map";
 import React from "react";
+import { SimpleService } from "@/components/services/service-list";
 
 interface BusinessContentProps {
   business: BusinessWithAvailability;
-  services?: { id: string; name: string; price: number }[];
+  services?: SimpleService[];
 }
 
 // Helper function to format time

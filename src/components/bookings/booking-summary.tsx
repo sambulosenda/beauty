@@ -4,11 +4,11 @@ import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Clock } from "lucide-react";
-
+import React from 'react';
 interface BookingSummaryProps {
   service: {
     name: string;
-    price: string;
+    price: number;
     duration: number;
   };
   selectedDate: Date | null;
@@ -44,7 +44,7 @@ export function BookingSummary({ service, selectedDate, selectedTime }: BookingS
         <div className="pt-4 border-t">
           <div className="flex justify-between">
             <span>Total</span>
-            <span className="font-medium">{formatCurrency(parseFloat(service.price))}</span>
+            <span className="font-medium">{formatCurrency(service.price)}</span>
           </div>
         </div>
       </CardContent>

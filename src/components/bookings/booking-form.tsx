@@ -24,7 +24,7 @@ interface BookingFormProps {
   selectedTime: string | null;
   setSelectedTime: (time: string | null) => void;
   onComplete: () => void;
-  onStripeStatusChange: () => void;
+  onStripeStatusChange: (status: { isConnected: boolean; accountEnabled: boolean; } | null) => void;
 }
 
 export default function BookingForm({ 

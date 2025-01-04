@@ -5,7 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { PaymentForm } from './payment-form';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
+import React from 'react';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface PaymentWrapperProps {
@@ -81,7 +81,6 @@ export function PaymentWrapper({ amount, onSuccess, bookingDetails }: PaymentWra
         <PaymentForm
           amount={amount}
           onSuccess={handlePaymentSuccess}
-          bookingDetails={bookingDetails}
         />
       </Elements>
     </div>

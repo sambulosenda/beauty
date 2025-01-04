@@ -6,20 +6,21 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import React
+ from "react"
+import Link from "next/link"
 
-interface Service {
-  id: string
-  name: string
-  description?: string
-  price: number
-  duration: number
-  category: string
-  image: string | null
+ export interface SimpleService {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  duration: number;
 }
 
 interface ServiceListProps {
-  services?: Service[]
-  businessSlug: string
+  services?: SimpleService[];
+  businessSlug: string;
 }
 
 export function ServiceList({ services = [], businessSlug }: ServiceListProps) {

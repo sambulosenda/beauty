@@ -1,21 +1,17 @@
-"use client"
-
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { mainNavItems } from "@/lib/nav-items"
-
+import React from 'react'
 export function DesktopNav() {
   const pathname = usePathname()
 
   return (
     <div className="hidden md:flex md:items-center md:space-x-1">
       {mainNavItems.map((item) => (
-        <motion.div
+        <div
           key={item.href}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="transform transition-transform duration-200 hover:scale-105 active:scale-95"
         >
           <Link
             href={item.href}
@@ -31,19 +27,14 @@ export function DesktopNav() {
             aria-label={item.title}
           >
             {pathname === item.href && (
-              <motion.span
-                layoutId="underline"
-                className="absolute left-0 bottom-0 w-full h-0.5 bg-rose-700"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
+              <span
+                className="absolute left-0 bottom-0 w-full h-0.5 bg-rose-700 transition-opacity duration-200 opacity-100"
               />
             )}
             {item.title}
           </Link>
-        </motion.div>
+        </div>
       ))}
     </div>
   )
 }
-

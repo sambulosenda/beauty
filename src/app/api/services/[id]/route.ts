@@ -64,12 +64,14 @@ export async function GET(
     return NextResponse.json({ error: 'Failed to fetch service' }, { status: 500 });
   }
 }
-
+// Update DELETE handler to use Promise params
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -77,7 +79,7 @@ export async function DELETE(
 
     const [deleted] = await db
       .delete(services)
-      .where(eq(services.id, params.id))
+      .where(eq(services.id, id))
       .returning()
 
     return NextResponse.json(deleted)
@@ -90,18 +92,20 @@ export async function DELETE(
   }
 }
 
+// Update PATCH handler to use Promise params
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     const { userId } = await auth()
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const body = await req.json()
-    
     const [updated] = await db
       .update(services)
       .set({
@@ -112,7 +116,7 @@ export async function PATCH(
         category: body.category,
         image: body.image,
       })
-      .where(eq(services.id, params.id))
+      .where(eq(services.id, id))
       .returning()
 
     return NextResponse.json(updated)

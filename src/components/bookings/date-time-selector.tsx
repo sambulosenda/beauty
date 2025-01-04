@@ -2,8 +2,8 @@
 
 import CustomBookingCalendar from './custom-booking-calendar'
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import React from 'react'
 
 interface DateTimeSelectorProps {
   selectedDate: Date | null
@@ -39,8 +39,8 @@ export function DateTimeSelector({
           selectedDate={selectedDate}
           onDateSelect={onDateSelect}
           bookedDates={[]}
-          minDate={new Date()}
-          maxDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)}
+          fromDate={new Date()}
+          toDate={new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)}
           disabledDays={disabledDays}
         />
       </div>

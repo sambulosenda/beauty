@@ -13,16 +13,19 @@ interface SearchParams {
   category?: string
 }
 
-export default async function ServicesPage({
-  searchParams,
-}: {
-  searchParams: SearchParams
-}) {
+interface ServicesPageProps {
+  searchParams: Promise<SearchParams>
+}
+
+export default async function ServicesPage({ searchParams }: ServicesPageProps) {
+  // Await the searchParams
+  const rawParams = await searchParams
+
   // Ensure searchParams are handled properly
   const validatedParams: SearchParams = {
-    search: typeof searchParams.search === 'string' ? searchParams.search : undefined,
-    location: typeof searchParams.location === 'string' ? searchParams.location : undefined,
-    category: typeof searchParams.category === 'string' ? searchParams.category : undefined,
+    search: typeof rawParams.search === 'string' ? rawParams.search : undefined,
+    location: typeof rawParams.location === 'string' ? rawParams.location : undefined,
+    category: typeof rawParams.category === 'string' ? rawParams.category : undefined,
   }
 
   return <ServicesPageContent searchParams={validatedParams} />

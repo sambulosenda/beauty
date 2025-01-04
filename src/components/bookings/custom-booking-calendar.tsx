@@ -2,13 +2,14 @@
 
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
+import React from "react"
 
 interface CustomBookingCalendarProps {
   selectedDate: Date | null
   onDateSelect: (date: Date) => void
   bookedDates?: Date[]
-  minDate?: Date
-  maxDate?: Date
+  fromDate?: Date
+  toDate?: Date
   disabledDays?: (date: Date) => boolean
 }
 
@@ -16,15 +17,15 @@ export default function CustomBookingCalendar({
   selectedDate, 
   onDateSelect, 
   bookedDates = [], 
-  minDate, 
-  maxDate,
+  fromDate, 
+  toDate,
   disabledDays 
 }: CustomBookingCalendarProps) {
   return (
     <div className="p-6 border rounded-lg bg-white">
       <Calendar
         mode="single"
-        selected={selectedDate}
+        selected={selectedDate as Date}
         onSelect={(date) => {
           if (date) {
             onDateSelect(date)
@@ -42,8 +43,8 @@ export default function CustomBookingCalendar({
           
           return isBooked || isDisabled
         }}
-        minDate={minDate}
-        maxDate={maxDate}
+        fromDate={fromDate}
+        toDate={toDate}
         initialFocus
         className="w-full"
         classNames={{

@@ -3,22 +3,18 @@
 import { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 
+import React from 'react';
 interface PaymentFormProps {
   amount: number;
-  onSuccess: () => void;
-  bookingDetails: any;
+  onSuccess: (paymentIntentId: string) => void;
 }
 
-export function PaymentForm({ amount, onSuccess, bookingDetails }: PaymentFormProps) {
+export function PaymentForm({ amount, onSuccess }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
-  const { toast } = useToast();
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +28,7 @@ export function PaymentForm({ amount, onSuccess, bookingDetails }: PaymentFormPr
 
       const result = await stripe.confirmPayment({
         elements,
+        redirect: "if_required",
         confirmParams: {
           return_url: `${window.location.origin}/bookings/confirmation`,
         },
@@ -40,8 +37,14 @@ export function PaymentForm({ amount, onSuccess, bookingDetails }: PaymentFormPr
       if (result.error) {
         throw result.error;
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
+
+      if (result.paymentIntent) {
+        onSuccess(result.paymentIntent.id);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error ) {
+        setError('An error occurred');
+      }
     } finally {
       setProcessing(false);
     }

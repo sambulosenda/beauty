@@ -10,8 +10,11 @@ import { Clock, MapPin, Calendar, CheckCircle2, AlertCircle } from 'lucide-react
 import { ClientBookingStatus } from '@/components/bookings/client-booking-status'
 import React from 'react'
 
-export async function generateMetadata(props: { params: { id: string } }): Promise<Metadata> {
-  const booking = await getBookingById(props.params.id)
+export async function generateMetadata(
+  props: { params: Promise<{ id: string }> }
+): Promise<Metadata> {
+  const { id } = await props.params
+  const booking = await getBookingById(id)
 
   if (!booking) {
     return {
@@ -25,8 +28,13 @@ export async function generateMetadata(props: { params: { id: string } }): Promi
   }
 }
 
-export default async function BookingPage({ params }: { params: { id: string } }) {
-  const booking = await getBookingById(params.id)
+export default async function BookingPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const { id } = await params
+  const booking = await getBookingById(id)
 
   if (!booking) {
     notFound()

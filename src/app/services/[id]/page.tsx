@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { notFound } from "next/navigation";
 import { formatCurrency, formatDuration } from "@/lib/utils";
 import { Suspense } from "react";
@@ -10,6 +9,7 @@ import { ServiceDetailSkeleton } from "@/components/services/service-detail-skel
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React from "react";
 
 function useService(serviceId: string) {
   return useQuery({
@@ -44,14 +44,19 @@ function useService(serviceId: string) {
         availableDays,
       };
     },
-    staleTime: 0, // Disable stale time to always fetch fresh data
-    refetchOnMount: true, // Ensure data is refetched when component mounts
-    retry: 2, // Retry failed requests twice
+    staleTime: 0,
+    refetchOnMount: true,
+    retry: 2,
   });
 }
 
-export default function ServicePage({ params }: { params: { id: string } }) {
-  const { data: service, isLoading, error } = useService(params.id);
+interface ServicePageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function ServicePage({ params }: ServicePageProps) {
+  const id = (params as any).id;
+  const { data: service, isLoading, error } = useService(id);
 
   if (isLoading) return <ServiceDetailSkeleton />;
   if (error || !service) return notFound();
@@ -70,7 +75,7 @@ export default function ServicePage({ params }: { params: { id: string } }) {
               <span className="text-2xl font-bold text-rose-600">
                 {formatCurrency(parseFloat(service.price))}
               </span>
-              <Link href={`/services/${params.id}/book`}>
+              <Link href={`/services/${id}/book`}>
                 <Button size="lg">Book Now</Button>
               </Link>
             </div>
@@ -203,7 +208,7 @@ export default function ServicePage({ params }: { params: { id: string } }) {
                     <h3 className="text-sm font-medium mb-2">Available Days</h3>
                     {service.availableDays?.length > 0 ? (
                       <div className="grid grid-cols-3 gap-2">
-                        {service.availableDays.map((day) => (
+                        {service.availableDays.map((day: string) => (
                           <Badge
                             key={day}
                             variant="secondary"
@@ -220,7 +225,7 @@ export default function ServicePage({ params }: { params: { id: string } }) {
                     )}
                   </div>
                   
-                  <Link href={`/services/${params.id}/book`} className="block">
+                  <Link href={`/services/${id}/book`} className="block">
                     <Button size="lg" className="w-full">
                       Book Now
                     </Button>

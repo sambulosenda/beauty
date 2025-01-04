@@ -27,9 +27,6 @@ export async function getBookingById(bookingId: string): Promise<BookingWithRevi
           rating: reviews.rating,
           comment: reviews.comment,
           createdAt: reviews.createdAt,
-          customer: {
-            name: users.name,
-          },
         },
       })
       .from(bookings)
