@@ -1,20 +1,20 @@
 "use client";
 
 import { useProviders } from "@/hooks/queries/use-providers";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
 import { Star, MapPin, Award, Clock, Search, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
 import { useState } from "react";
 import { ProviderCard } from "@/components/provider-card";
+import React from "react";
 
 export default function Home() {
   const [treatment, setTreatment] = useState("");
   const [location, setLocation] = useState("");
   const { data, isLoading, error } = useProviders();
+
+  console.log(data)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,12 +44,7 @@ export default function Home() {
 
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-5xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                className="text-center"
-              >
+              <div className="text-center">
                 {/* Main Heading */}
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-6">
                   <span className="block mb-2">Discover and Book</span>
@@ -98,12 +93,7 @@ export default function Home() {
                 </div>
 
                 {/* Trust Indicators */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="mt-12 flex flex-wrap justify-center gap-8 text-white"
-                >
+                <div className="mt-12 flex flex-wrap justify-center gap-8 text-white">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-full bg-white/10">
                       <Star className="h-6 w-6 text-rose-300 fill-rose-300" />
@@ -131,8 +121,8 @@ export default function Home() {
                       <div className="text-sm text-gray-400">Quick & easy process</div>
                     </div>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -225,12 +215,7 @@ export default function Home() {
         <section className="relative bg-gray-900 py-12 sm:py-24 overflow-hidden">
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7 }}
-                className="relative z-10"
-              >
+              <div className="relative z-10">
                 <span className="inline-block rounded-full bg-white/10 px-3 sm:px-4 py-1.5 text-sm font-medium text-white mb-4 sm:mb-6">
                   For Professionals
                 </span>
@@ -245,15 +230,10 @@ export default function Home() {
                 <Button className="mt-6 sm:mt-8 bg-white text-gray-900 hover:bg-gray-100 font-semibold px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg rounded-full transition-colors">
                   Partner with us
                 </Button>
-              </motion.div>
+              </div>
 
               <div className="relative hidden lg:block">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="relative bg-white/10 p-8 rounded-xl border border-white/20"
-                >
+                <div className="relative bg-white/10 p-8 rounded-xl border border-white/20">
                   <h3 className="text-2xl font-semibold mb-4 text-white">
                     Salon Dashboard
                   </h3>
@@ -273,7 +253,7 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                </motion.div>
+                </div>
               </div>
             </div>
           </div>

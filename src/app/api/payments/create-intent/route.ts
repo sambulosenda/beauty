@@ -1,69 +1,47 @@
 import { NextResponse } from 'next/server';
-import { stripe, calculatePlatformFee } from '@/lib/stripe';
+import { stripe } from '@/lib/stripe';
+import { currentUser } from '@clerk/nextjs/server'
 import { db } from '@/db';
-import { bookings, users } from '@/db/schema';
+import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { bookingId } = await request.json();
-    
-    // Get booking with service details
-    const booking = await db.query.bookings.findFirst({
-      where: eq(bookings.id, bookingId),
-      with: {
-        service: true,
-        provider: true,
-        customer: true,
-      },
+    const user = await currentUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get the user from our database
+    const dbUser = await db.query.users.findFirst({
+      where: eq(users.clerkId, user.id)
     });
 
-    if (!booking) {
-      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    if (!dbUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Ensure provider has Stripe account
-    if (!booking.provider.stripeConnectAccountId) {
-      return NextResponse.json(
-        { error: 'Provider not setup for payments' },
-        { status: 400 }
-      );
-    }
+    const body = await req.json();
+    const { amount, serviceId, providerId, date, time } = body;
 
-    // Calculate amount and fee
-    const amount = Math.round(parseFloat(booking.service.price) * 100);
-    const platformFee = calculatePlatformFee(amount);
-
-    // Create payment intent
+    // Create a payment intent with the booking details in metadata
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+      amount: Math.round(amount * 100), // Convert to cents
       currency: 'usd',
-      application_fee_amount: platformFee,
-      transfer_data: {
-        destination: booking.provider.stripeConnectAccountId,
-      },
-      metadata: {
-        bookingId: booking.id,
-        providerId: booking.providerId,
-        customerId: booking.customerId,
-      },
       automatic_payment_methods: {
         enabled: true,
       },
+      metadata: {
+        userId: dbUser.id, // Use our database user ID
+        serviceId,
+        providerId,
+        bookingDate: date,
+        bookingTime: time
+      },
     });
 
-    // Update booking with payment intent ID
-    await db
-      .update(bookings)
-      .set({ 
-        stripePaymentIntentId: paymentIntent.id,
-        stripePaymentStatus: 'processing',
-        amount: booking.service.price,
-      })
-      .where(eq(bookings.id, bookingId));
-
-    return NextResponse.json({ 
-      clientSecret: paymentIntent.client_secret 
+    return NextResponse.json({
+      clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
     console.error('Payment intent creation error:', error);

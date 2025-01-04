@@ -16,6 +16,7 @@ import {
   BarChart,
   HelpCircle,
   UserCircle,
+  Image,
 } from 'lucide-react'
 import { UserButton } from '@clerk/nextjs'
 
@@ -58,6 +59,12 @@ const businessNavItems = [
     href: '/dashboard/availability',
     icon: Clock,
     color: 'text-orange-500'
+  },
+  {
+    title: 'Gallery',
+    href: '/dashboard/gallery',
+    icon: Image,
+    color: 'text-yellow-500'
   },
   {
     title: 'Customers',

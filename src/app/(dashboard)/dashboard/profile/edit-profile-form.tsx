@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { ImageUpload } from "@/components/ui/image-upload"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { ImageUpload } from "@/components/ui/image-upload";
 import {
   Form,
   FormControl,
@@ -12,12 +12,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import React from "react";
 
 const formSchema = z.object({
   name: z.string().min(2),
@@ -26,18 +27,26 @@ const formSchema = z.object({
   address: z.string().optional(),
   phone: z.string().optional(),
   logo: z.string().optional(),
-})
+});
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 interface EditProfileFormProps {
-  initialData: any
+  initialData: {
+    name: string;
+    businessName?: string;
+    description?: string;
+    address?: string;
+    phone?: string;
+    logo?: string;
+    role: string;
+  };
 }
 
 export function EditProfileForm({ initialData }: EditProfileFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -49,34 +58,34 @@ export function EditProfileForm({ initialData }: EditProfileFormProps) {
       phone: initialData.phone || "",
       logo: initialData.logo || "",
     },
-  })
+  });
 
   async function onSubmit(data: FormValues) {
     try {
-      setIsLoading(true)
-      const response = await fetch('/api/user', {
-        method: 'PATCH',
+      setIsLoading(true);
+      const response = await fetch("/api/user", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-      })
+      });
 
-      if (!response.ok) throw new Error('Failed to update profile')
+      if (!response.ok) throw new Error("Failed to update profile");
 
       toast({
         title: "Success",
         description: "Profile updated successfully",
-      })
-      router.refresh()
-    } catch (error) {
+      });
+      router.refresh();
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: "Failed to update profile",
+        description: error instanceof Error ? error.message : "Failed to update profile",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -115,7 +124,7 @@ export function EditProfileForm({ initialData }: EditProfileFormProps) {
           )}
         />
 
-        {initialData.role === 'PROVIDER' && (
+        {initialData.role === "PROVIDER" && (
           <>
             <FormField
               control={form.control}
@@ -180,5 +189,5 @@ export function EditProfileForm({ initialData }: EditProfileFormProps) {
         </Button>
       </form>
     </Form>
-  )
+  );
 }

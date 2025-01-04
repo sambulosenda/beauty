@@ -1,89 +1,86 @@
 'use client'
 
-import { useState } from 'react'
-import { 
-  addMonths, 
-  subMonths,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
-  format,
-  isSameMonth,
-  isSameDay
-} from 'date-fns'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Calendar } from "@/components/ui/calendar"
+import { cn } from "@/lib/utils"
+import React from "react"
 
 interface CustomBookingCalendarProps {
-  selectedDate: Date | null | undefined
+  selectedDate: Date | null
   onDateSelect: (date: Date) => void
   bookedDates?: Date[]
-  minDate?: Date
-  maxDate?: Date
+  fromDate?: Date
+  toDate?: Date
+  disabledDays?: (date: Date) => boolean
 }
 
-export function CustomBookingCalendar({ selectedDate, onDateSelect, bookedDates = [], minDate, maxDate }: CustomBookingCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-
-  const monthStart = startOfMonth(currentMonth)
-  const monthEnd = endOfMonth(monthStart)
-  const calendarStart = startOfWeek(monthStart)
-  const calendarEnd = endOfWeek(monthEnd)
-
-  const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd })
-
-  const previousMonth = () => setCurrentMonth(subMonths(currentMonth, 1))
-  const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1))
-
-  const isHighlighted = (date: Date) => 
-    bookedDates.some(d => isSameDay(d, date))
-
+export default function CustomBookingCalendar({ 
+  selectedDate, 
+  onDateSelect, 
+  bookedDates = [], 
+  fromDate, 
+  toDate,
+  disabledDays 
+}: CustomBookingCalendarProps) {
   return (
-    <div className="w-full max-w-sm mx-auto bg-white">
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={previousMonth} className="p-2">
-          <ChevronLeft className="w-6 h-6 text-gray-600" />
-        </button>
-        <h2 className="text-1xl font-bold">
-          {format(currentMonth, 'MMMM yyyy')}
-        </h2>
-        <button onClick={nextMonth} className="p-2">
-          <ChevronRight className="w-6 h-6 text-gray-600" />
-        </button>
-      </div>
-      <div className="grid grid-cols-7 gap-2 mb-2">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-          <div key={day} className="text-center text-sm font-medium text-gray-500">
-            {day}
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-7 gap-2">
-        {days.map(day => {
-          const isCurrentMonth = isSameMonth(day, currentMonth)
-          const isSelected = selectedDate && isSameDay(day, selectedDate)
-          const isHighlightedDate = isHighlighted(day)
-
-          return (
-            <button
-              key={day.toString()}
-              onClick={() => onDateSelect && onDateSelect(day)}
-              className={cn(
-                "h-10 w-10 flex items-center justify-center rounded-full text-sm",
-                !isCurrentMonth && "text-gray-300",
-                isCurrentMonth && !isSelected && !isHighlightedDate && "text-gray-900",
-                isSelected && "bg-blue-900 text-white",
-                isHighlightedDate && !isSelected && "border border-gray-300",
-                isCurrentMonth && !isSelected && "hover:bg-gray-100"
-              )}
-            >
-              {format(day, 'd')}
-            </button>
+    <div className="p-6 border rounded-lg bg-white">
+      <Calendar
+        mode="single"
+        selected={selectedDate as Date}
+        onSelect={(date) => {
+          if (date) {
+            onDateSelect(date)
+          }
+        }}
+        disabled={(date) => {
+          const isBooked = bookedDates.some(
+            bookedDate => 
+              bookedDate.getFullYear() === date.getFullYear() &&
+              bookedDate.getMonth() === date.getMonth() &&
+              bookedDate.getDate() === date.getDate()
           )
-        })}
-      </div>
+          
+          const isDisabled = disabledDays ? disabledDays(date) : false
+          
+          return isBooked || isDisabled
+        }}
+        fromDate={fromDate}
+        toDate={toDate}
+        initialFocus
+        className="w-full"
+        classNames={{
+          months: "w-full space-y-4",
+          month: "space-y-4",
+          caption: "flex justify-center pt-1 relative items-center text-lg font-semibold",
+          caption_label: "text-lg font-semibold",
+          nav: "space-x-1 flex items-center",
+          nav_button: cn(
+            "h-9 w-9 bg-transparent p-0 opacity-50 hover:opacity-100 rounded-md",
+            "hover:bg-gray-100 transition-colors"
+          ),
+          nav_button_previous: "absolute left-1",
+          nav_button_next: "absolute right-1",
+          table: "w-full border-collapse space-y-1",
+          head_row: "flex w-full",
+          head_cell: cn(
+            "text-gray-500 rounded-md w-full font-medium text-[0.9rem]",
+            "first:text-red-500 last:text-red-500"
+          ),
+          row: "flex w-full mt-2",
+          cell: cn(
+            "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-rose-50",
+            "first:text-red-500 last:text-red-500 h-12 w-full"
+          ),
+          day: cn(
+            "h-12 w-full p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-md transition-colors",
+            "hover:bg-rose-100 aria-selected:bg-rose-600 aria-selected:text-white aria-selected:hover:bg-rose-600"
+          ),
+          day_today: "bg-gray-50 text-rose-600 font-semibold",
+          day_outside: "text-gray-400 opacity-50",
+          day_disabled: "text-gray-400 opacity-50 hover:bg-transparent",
+          day_range_middle: "aria-selected:bg-rose-50 aria-selected:text-rose-600",
+          day_hidden: "invisible",
+        }}
+      />
     </div>
   )
 }

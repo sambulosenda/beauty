@@ -7,9 +7,12 @@ import { currentUser } from '@clerk/nextjs/server'
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await the params to get the id
+    const { id } = await params
+    
     const clerkUser = await currentUser()
     if (!clerkUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,7 +29,7 @@ export async function PATCH(
 
     // Get the booking
     const booking = await db.query.bookings.findFirst({
-      where: eq(bookings.id, params.id)
+      where: eq(bookings.id, id)  // Use the awaited id
     })
 
     if (!booking) {
@@ -43,7 +46,7 @@ export async function PATCH(
     const [updatedBooking] = await db
       .update(bookings)
       .set({ status })
-      .where(eq(bookings.id, params.id))
+      .where(eq(bookings.id, id))  // Use the awaited id
       .returning()
 
     return NextResponse.json(updatedBooking)

@@ -1,6 +1,5 @@
 // app/dashboard/services/data-table.tsx
-"use client"
-
+"use client";
 import {
   ColumnDef,
   flexRender,
@@ -10,7 +9,7 @@ import {
   SortingState,
   ColumnFiltersState,
   getFilteredRowModel,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -18,21 +17,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { useState } from "react"
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import React from "react";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data,
@@ -46,7 +46,7 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
     },
-  })
+  });
 
   return (
     <div>
@@ -75,7 +75,7 @@ export function DataTable<TData, TValue>({
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -89,14 +89,20 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No services found.
                 </TableCell>
               </TableRow>
@@ -105,5 +111,5 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
     </div>
-  )
+  );
 }

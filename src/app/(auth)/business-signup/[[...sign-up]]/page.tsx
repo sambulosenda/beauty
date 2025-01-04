@@ -1,4 +1,5 @@
 import { SignUp } from "@clerk/nextjs";
+import React from "react";
 
 export default function BusinessSignUpPage() {
   return (
@@ -11,10 +12,10 @@ export default function BusinessSignUpPage() {
           }
         }}
         forceRedirectUrl="/onboarding/business"
-        initialValues={{
+        unsafeMetadata={{
           role: "PROVIDER"
         }}
       />
     </div>
   );
-} 
+}

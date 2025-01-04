@@ -4,6 +4,7 @@
 import { useRouter } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { BookingStatusUpdate } from './booking-status-update'
+import React from 'react'
 
 interface ClientBookingStatusProps {
   bookingId: string;

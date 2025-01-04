@@ -1,35 +1,36 @@
 // app/dashboard/services/page.tsx
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
-import { db } from '@/db'
-import { services, users } from '@/db/schema'
-import { eq } from 'drizzle-orm'
-import { DataTable } from './data-table'
-import { columns } from './columns'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { db } from "@/db";
+import { services, users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Plus } from "lucide-react";
+import React from "react";
 
 export default async function ServicesPage() {
-  const { userId } = await auth()
+  const { userId } = await auth();
   if (!userId) {
-    redirect('/sign-in')
+    redirect("/sign-in");
   }
 
   const provider = await db.query.users.findFirst({
-    where: eq(users.clerkId, userId)
-  })
+    where: eq(users.clerkId, userId),
+  });
 
-  if (!provider || provider.role !== 'PROVIDER') {
-    redirect('/')
+  if (!provider || provider.role !== "PROVIDER") {
+    redirect("/");
   }
 
   const providerServices = await db.query.services.findMany({
     where: eq(services.providerId, provider.id),
     with: {
-      provider: true
-    }
-  })
+      provider: true,
+    },
+  });
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -44,5 +45,5 @@ export default async function ServicesPage() {
       </div>
       <DataTable columns={columns} data={providerServices} />
     </div>
-  )
+  );
 }

@@ -17,9 +17,15 @@ interface Service {
 interface UseServicesParams {
   search?: string;
   location?: string;
+  category?: string;
+  filters?: {
+    priceRange: [number, number];
+    duration: [number, number];
+    rating: number | null;
+  };
 }
 
-export function useServices({ search, location }: UseServicesParams = {}) {
+export function useServices({ search, location, category, filters }: UseServicesParams) {
   return useQuery({
     queryKey: ['services', { search, location }],
     queryFn: async () => {

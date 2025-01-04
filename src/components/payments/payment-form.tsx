@@ -3,51 +3,50 @@
 import { useState } from 'react';
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
 
+import React from 'react';
 interface PaymentFormProps {
-  bookingId: string;
   amount: number;
+  onSuccess: (paymentIntentId: string) => void;
 }
 
-export function PaymentForm({ bookingId, amount }: PaymentFormProps) {
+export function PaymentForm({ amount, onSuccess }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stripe || !elements) return;
 
-    setIsLoading(true);
+    setProcessing(true);
 
     try {
-      const { error } = await stripe.confirmPayment({
+      const { error: submitError } = await elements.submit();
+      if (submitError) throw submitError;
+
+      const result = await stripe.confirmPayment({
         elements,
+        redirect: "if_required",
         confirmParams: {
-          return_url: `${window.location.origin}/bookings/${bookingId}/confirmation`,
+          return_url: `${window.location.origin}/bookings/confirmation`,
         },
       });
 
-      if (error) {
-        toast({
-          title: 'Payment failed',
-          description: error.message,
-          variant: 'destructive',
-        });
+      if (result.error) {
+        throw result.error;
       }
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast({
-        title: 'Payment failed',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
+
+      if (result.paymentIntent) {
+        onSuccess(result.paymentIntent.id);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error ) {
+        setError('An error occurred');
+      }
     } finally {
-      setIsLoading(false);
+      setProcessing(false);
     }
   };
 
@@ -56,10 +55,10 @@ export function PaymentForm({ bookingId, amount }: PaymentFormProps) {
       <PaymentElement />
       <Button
         type="submit"
-        disabled={!stripe || isLoading}
+        disabled={!stripe || processing}
         className="w-full"
       >
-        {isLoading ? 'Processing...' : `Pay ${amount}`}
+        {processing ? 'Processing...' : `Pay ${amount}`}
       </Button>
     </form>
   );

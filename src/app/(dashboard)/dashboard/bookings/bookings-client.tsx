@@ -1,10 +1,11 @@
 'use client';
 
+import React from 'react'
 import { useQuery } from '@tanstack/react-query';
 import { BookingsList } from './bookings-list';
 import { BookingsFilter } from './bookings-filter';
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
-import type { BookingsResponse, Booking } from '@/types/bookings';
+import { useSearchParams } from 'next/navigation';
+import type { BookingsResponse } from '@/types/bookings';
 
 export function BookingsClient({
   initialStatus,

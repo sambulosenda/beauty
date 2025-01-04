@@ -4,6 +4,7 @@ import { bookings, services } from "@/db/schema";
 import { formatCurrency } from "@/lib/utils";
 import { eq, count } from "drizzle-orm";
 import { Calendar, DollarSign, Users } from 'lucide-react';
+import React from 'react'
 
 export async function BookingsStats({ userId, userRole }: { userId: string, userRole: string }) {
 

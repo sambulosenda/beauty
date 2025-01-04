@@ -1,61 +1,73 @@
-'use client'
+"use client";
 
-import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import React from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@/components/ui/hover-card"
-import { formatCurrency } from '@/lib/utils'
-import { format, isSameDay } from 'date-fns'
-import { Spinner } from '@/components/ui/spinner'
+} from "@/components/ui/hover-card";
+import { formatCurrency } from "@/lib/utils";
+import { format, isSameDay } from "date-fns";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Booking {
-  id: string
-  startTime: string
-  endTime: string
-  status: 'CONFIRMED' | 'PENDING' | 'CANCELLED'
+  id: string;
+  startTime: string;
+  endTime: string;
+  status: "CONFIRMED" | "PENDING" | "CANCELLED";
   service: {
-    name: string
-    price: string
-  }
+    name: string;
+    price: string;
+  };
   customer: {
-    name: string
-    email: string
-  }
+    name: string;
+    email: string;
+  };
 }
 
 async function fetchBookings(providerId: string): Promise<Booking[]> {
-  const response = await fetch(`/api/bookings?providerId=${providerId}`)
+  const response = await fetch(`/api/bookings?providerId=${providerId}`);
   if (!response.ok) {
-    throw new Error('Failed to fetch bookings')
+    throw new Error("Failed to fetch bookings");
   }
-  return response.json()
+  return response.json();
 }
 
 export function Calendar({ providerId }: { providerId: string }) {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
-  const { data: bookings, isLoading, error } = useQuery<Booking[], Error>({
-    queryKey: ['bookings', providerId],
+  const {
+    data: bookings,
+    isLoading,
+    error,
+  } = useQuery<Booking[], Error>({
+    queryKey: ["bookings", providerId],
     queryFn: () => fetchBookings(providerId),
-  })
+  });
 
-  const getDayBookings = useMemo(() => (date: Date) => {
-    if (!bookings) return []
-    return bookings.filter(booking => 
-      isSameDay(new Date(booking.startTime), date)
-    )
-  }, [bookings])
+  const getDayBookings = useMemo(
+    () => (date: Date) => {
+      if (!bookings) return [];
+      return bookings.filter((booking) =>
+        isSameDay(new Date(booking.startTime), date)
+      );
+    },
+    [bookings]
+  );
 
   if (isLoading) {
-    return <Spinner />
+    return <Spinner />;
   }
 
   if (error) {
-    return <div className="text-red-500">Error loading bookings: {error.message}</div>
+    return (
+      <div className="text-red-500">
+        Error loading bookings: {error.message}
+      </div>
+    );
   }
 
   return (
@@ -66,10 +78,10 @@ export function Calendar({ providerId }: { providerId: string }) {
           selected={selectedDate}
           onSelect={(date) => date && setSelectedDate(date)}
           modifiers={{
-            booked: (date) => getDayBookings(date).length > 0
+            booked: (date) => getDayBookings(date).length > 0,
           }}
           modifiersStyles={{
-            booked: { fontWeight: 'bold', textDecoration: 'underline' }
+            booked: { fontWeight: "bold", textDecoration: "underline" },
           }}
           className="rounded-md border"
         />
@@ -77,7 +89,7 @@ export function Calendar({ providerId }: { providerId: string }) {
 
       <div className="flex-1">
         <h2 className="text-lg font-semibold mb-4">
-          Bookings for {format(selectedDate, 'MMMM d, yyyy')}
+          Bookings for {format(selectedDate, "MMMM d, yyyy")}
         </h2>
         <div className="space-y-4">
           {getDayBookings(selectedDate).map((booking) => (
@@ -88,15 +100,19 @@ export function Calendar({ providerId }: { providerId: string }) {
                     <div>
                       <h3 className="font-medium">{booking.service.name}</h3>
                       <p className="text-sm text-gray-500">
-                        {format(new Date(booking.startTime), 'h:mm a')} - 
-                        {format(new Date(booking.endTime), 'h:mm a')}
+                        {format(new Date(booking.startTime), "h:mm a")} -
+                        {format(new Date(booking.endTime), "h:mm a")}
                       </p>
                     </div>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-800' :
-                      booking.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        booking.status === "CONFIRMED"
+                          ? "bg-green-100 text-green-800"
+                          : booking.status === "PENDING"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
                       {booking.status}
                     </span>
                   </div>
@@ -106,7 +122,9 @@ export function Calendar({ providerId }: { providerId: string }) {
                 <div>
                   <h4 className="font-semibold">Customer Details</h4>
                   <p className="text-sm">{booking.customer.name}</p>
-                  <p className="text-sm text-gray-500">{booking.customer.email}</p>
+                  <p className="text-sm text-gray-500">
+                    {booking.customer.email}
+                  </p>
                   <div className="mt-2">
                     <span className="text-sm font-medium">
                       Price: {formatCurrency(parseFloat(booking.service.price))}
@@ -122,6 +140,5 @@ export function Calendar({ providerId }: { providerId: string }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

@@ -5,15 +5,20 @@ import { loadStripe } from '@stripe/stripe-js';
 import { PaymentForm } from './payment-form';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
+import React from 'react';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface PaymentWrapperProps {
-  bookingId: string;
   amount: number;
+  onSuccess: (paymentIntentId: string) => void;
+  bookingDetails: {
+    service: any;
+    date: Date | null;
+    time: string | null;
+  };
 }
 
-export function PaymentWrapper({ bookingId, amount }: PaymentWrapperProps) {
+export function PaymentWrapper({ amount, onSuccess, bookingDetails }: PaymentWrapperProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +26,13 @@ export function PaymentWrapper({ bookingId, amount }: PaymentWrapperProps) {
     fetch('/api/payments/create-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bookingId }),
+      body: JSON.stringify({
+        amount,
+        serviceId: bookingDetails.service.id,
+        providerId: bookingDetails.service.providerId,
+        date: bookingDetails.date,
+        time: bookingDetails.time
+      }),
     })
       .then(async (res) => {
         const data = await res.json();
@@ -35,7 +46,11 @@ export function PaymentWrapper({ bookingId, amount }: PaymentWrapperProps) {
         console.error('Payment setup error:', err);
         setError(err.message);
       });
-  }, [bookingId]);
+  }, [amount, bookingDetails]);
+
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
+    onSuccess(paymentIntentId);
+  };
 
   if (error) {
     return (
@@ -63,7 +78,10 @@ export function PaymentWrapper({ bookingId, amount }: PaymentWrapperProps) {
           },
         }}
       >
-        <PaymentForm bookingId={bookingId} amount={amount} />
+        <PaymentForm
+          amount={amount}
+          onSuccess={handlePaymentSuccess}
+        />
       </Elements>
     </div>
   );

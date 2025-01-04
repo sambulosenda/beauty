@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <ClerkProvider>
-      <QueryClientProvider client={queryClient}>
+     <QueryClientProvider client={queryClient}>
       <html lang="en" suppressHydrationWarning className={outfit.variable}>
         <body className={outfit.className}>
           {!isDashboard && <Navbar />}

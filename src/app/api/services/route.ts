@@ -10,8 +10,32 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
     const location = searchParams.get('location')
+    const category = searchParams.get('category')
 
-    let query = db.query.services.findMany({
+    let conditions = []
+
+    if (search) {
+      conditions.push(
+        or(
+          like(services.name, `%${search}%`),
+          like(services.description, `%${search}%`)
+        )
+      )
+    }
+
+    if (location) {
+      conditions.push(
+        like(users.address, `%${location}%`)
+      )
+    }
+
+    if (category && category !== 'all') {
+      conditions.push(
+        eq(services.category, category)
+      )
+    }
+
+    const query = db.query.services.findMany({
       with: {
         provider: {
           columns: {
@@ -22,11 +46,7 @@ export async function GET(request: Request) {
           }
         }
       },
-      where: search ? 
-        or(
-          like(services.name, `%${search}%`),
-          like(services.description, `%${search}%`)
-        ) : undefined
+      where: conditions.length > 0 ? and(...conditions) : undefined
     })
 
     const allServices = await query

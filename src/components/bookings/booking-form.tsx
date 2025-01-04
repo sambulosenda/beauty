@@ -1,4 +1,5 @@
 'use client'
+import React from 'react'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -10,17 +11,31 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Calendar } from '@/components/ui/calendar'
 import { DayPicker } from "react-day-picker"
 import { checkAvailability } from '@/lib/availability'
-import { CalendarIcon, Clock, CheckCircle2 } from 'lucide-react'
+import { CalendarIcon, Clock, CheckCircle2, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PaymentWrapper } from '@/components/payments/payment-wrapper'
-import { BookingFormProps } from '../../../types'
-import { CustomBookingCalendar } from './custom-booking-calendar'
+import CustomBookingCalendar from './custom-booking-calendar'
 
+interface BookingFormProps {
+  service: any;  // Update this type based on your service type
+  selectedDate: Date | null;
+  setSelectedDate: (date: Date | null) => void;
+  selectedTime: string | null;
+  setSelectedTime: (time: string | null) => void;
+  onComplete: () => void;
+  onStripeStatusChange: (status: { isConnected: boolean; accountEnabled: boolean; } | null) => void;
+}
 
-export default function BookingForm({ service }: BookingFormProps) {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+export default function BookingForm({ 
+  service, 
+  selectedDate, 
+  selectedTime, 
+  setSelectedDate, 
+  setSelectedTime, 
+  onComplete,
+  onStripeStatusChange 
+}: BookingFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { user, isSignedIn } = useUser()
@@ -28,6 +43,22 @@ export default function BookingForm({ service }: BookingFormProps) {
   const [showPayment, setShowPayment] = useState(false)
   const [bookingId, setBookingId] = useState<string | null>(null)
   const [bookedDates, setBookedDates] = useState<Date[]>([])
+  const [providerStripeStatus, setProviderStripeStatus] = useState<{
+    isConnected: boolean;
+    accountEnabled: boolean;
+  } | null>(null)
+  const [isCheckingStripe, setIsCheckingStripe] = useState(true)
+
+  // Reset form state when provider changes
+  useEffect(() => {
+    setError(null)
+    setShowPayment(false)
+    setBookingId(null)
+    setBookedDates([])
+    setProviderStripeStatus(null)
+    setIsCheckingStripe(true)
+    setIsLoading(false)
+  }, [service.providerId])
 
   useEffect(() => {
     async function fetchBookedDates() {
@@ -42,6 +73,26 @@ export default function BookingForm({ service }: BookingFormProps) {
 
     fetchBookedDates()
   }, [service.providerId])
+
+  useEffect(() => {
+    async function checkProviderStripeStatus() {
+      setIsCheckingStripe(true);
+      try {
+        const response = await fetch(`/api/providers/${service.providerId}/stripe-status`);
+        const data = await response.json();
+        setProviderStripeStatus(data);
+      } catch (error) {
+        console.error('Error checking provider stripe status:', error);
+        setError('Unable to verify payment setup');
+      } finally {
+        setIsCheckingStripe(false);
+      }
+    }
+
+    checkProviderStripeStatus();
+  }, [service.providerId]);
+
+  const isProviderStripeReady = providerStripeStatus?.isConnected && providerStripeStatus?.accountEnabled;
 
   const handleDateChange = (date: Date | null) => {
     setError(null)
@@ -77,29 +128,39 @@ export default function BookingForm({ service }: BookingFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate || !selectedTime || !isSignedIn) return
+    if (!selectedDate || !selectedTime || !isSignedIn) return;
 
     try {
-      const startTime = parse(selectedTime, 'HH:mm', selectedDate)
-
-      const response = await fetch('/api/bookings', {
+      setIsLoading(true);
+      
+      // Create payment intent first
+      const response = await fetch('/api/payments/create-intent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
+          amount: parseFloat(service.price) * 100,
+          currency: 'gbp',
           serviceId: service.id,
-          providerId: service.providerId,
-          date: startTime,
+          date: selectedDate,
+          time: selectedTime,
         }),
-      })
+      });
 
-      const booking = await response.json()
-      if (booking.error) throw new Error(booking.error)
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
 
-      setBookingId(booking.id)
-      setShowPayment(true)
+      setBookingId(data.id);
+      setShowPayment(true);
     } catch (error) {
       console.error('Booking error:', error)
-      // Handle error...
+      setError('Failed to process booking. Please try again.')
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -115,8 +176,6 @@ export default function BookingForm({ service }: BookingFormProps) {
     return slots
   }
 
- 
-
   if (!isSignedIn) {
     return (
       <div className="text-center">
@@ -131,104 +190,58 @@ export default function BookingForm({ service }: BookingFormProps) {
   if (showPayment && bookingId) {
     return (
       <PaymentWrapper
-        bookingId={bookingId}
         amount={parseFloat(service.price)}
+        onSuccess={() => {}}
+        bookingDetails={{
+          service,
+          date: selectedDate,
+          time: selectedTime
+        }}
       />
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm">
-      <div className="p-6">
-        <h2 className="text-2xl font-semibold mb-2">Book this Service</h2>
-        <p className="text-gray-600 mb-6">Select a date and time to book your appointment</p>
-
-      
-
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <CustomBookingCalendar
-              selectedDate={selectedDate}
-              onDateSelect={handleDateChange}
-              bookedDates={[]} // You can pass booked dates from your availability check
-              minDate={new Date()}
-              maxDate={addDays(new Date(), 30)}
-            />
-          </motion.div>
-
-          <AnimatePresence>
-            {selectedDate && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="grid grid-cols-2 gap-2">
-                  {generateTimeSlots().map((time) => {
-                    const isAvailable = true // Replace with actual availability check
-                    return (
-                      <Button
-                        key={time}
-                        type="button"
-                        variant={selectedTime === time ? "default" : "outline"}
-                        className={cn(
-                          "py-6",
-                          selectedTime === time && "bg-primary text-primary-foreground",
-                          !isAvailable && "opacity-50 cursor-not-allowed"
-                        )}
-                        disabled={!isAvailable}
-                        onClick={() => handleTimeChange(time)}
-                      >
-                        {format(parse(time, 'HH:mm', new Date()), 'h:mm a')}
-                      </Button>
-                    )
-                  }
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {(selectedDate || selectedTime) && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="p-4 bg-muted rounded-lg"
-            >
-              <h3 className="font-medium mb-2">Booking Summary</h3>
-              <div className="space-y-1 text-sm">
-                {selectedDate && (
-                  <p>Date: {format(selectedDate, 'EEEE, MMMM d, yyyy')}</p>
-                )}
-                {selectedTime && (
-                  <p>Time: {format(parse(selectedTime, 'HH:mm', new Date()), 'h:mm a')}</p>
-                )}
-              </div>
-            </motion.div>
-          )}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid gap-4">
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <h3 className="font-medium mb-2">Selected Appointment</h3>
+          <p>Date: {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Not selected'}</p>
+          <p>Time: {selectedTime || 'Not selected'}</p>
         </div>
-
-        {error && (
-          <Alert variant="destructive" className="mt-6">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-      </div>
-
-      <div className="border-t p-6">
-        <Button
-          type="submit"
-          disabled={!selectedDate || !selectedTime || isLoading}
+        
+        {/* Add any additional form fields here */}
+        
+        <Button 
+          type="submit" 
+          disabled={
+            !selectedDate || 
+            !selectedTime || 
+            isLoading || 
+            isCheckingStripe || 
+            !isProviderStripeReady
+          }
           className="w-full"
-          size="lg"
         >
-          {isLoading ? 'Booking...' : `Book Now - ${formatCurrency(parseFloat(service.price))}`}
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : isCheckingStripe ? (
+            'Checking availability...'
+          ) : !isProviderStripeReady ? (
+            'Provider not available'
+          ) : (
+            'Book Now'
+          )}
         </Button>
       </div>
+
+      {!isCheckingStripe && !isProviderStripeReady && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>
+            This provider is not yet setup to accept bookings. Please try again later.
+          </AlertDescription>
+        </Alert>
+      )}
     </form>
   )
 }

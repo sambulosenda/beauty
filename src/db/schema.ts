@@ -40,6 +40,9 @@ export const users = pgTable('users', {
   stripeCustomerId: text('stripe_customer_id').unique(),
   stripeConnectAccountId: text('stripe_connect_account_id').unique(),
   stripeAccountEnabled: boolean('stripe_account_enabled').default(false),
+  gallery: text('gallery').array(),
+  rating: decimal('rating', { precision: 3, scale: 2 }).notNull().default('5.00'),
+  reviewCount: integer('review_count').notNull().default(0),
 })
 
 export const availability = pgTable('availability', {
@@ -98,6 +101,7 @@ export const bookings = pgTable('bookings', {
   }).default('pending'),
   amount: decimal('amount', { precision: 10, scale: 2 }),
   currency: text('currency').default('usd'),
+  
 })
 
 // Reviews Table
@@ -119,7 +123,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   providerBookings: many(bookings, { relationName: 'bookingProvider' }),
   customerBookings: many(bookings, { relationName: 'bookingCustomer' }),
   providerReviews: many(reviews, { relationName: 'reviewProvider' }),
-  customerReviews: many(reviews, { relationName: 'reviewCustomer' })
+  customerReviews: many(reviews, { relationName: 'reviewCustomer' }),
+  availability: many(availability)
 }))
 
 export const servicesRelations = relations(services, ({ one }) => ({
@@ -166,6 +171,7 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
 export const availabilityRelations = relations(availability, ({ one }) => ({
   provider: one(users, {
     fields: [availability.providerId],
-    references: [users.id],
-  }),
+    references: [users.id]
+  })
 }))
+
