@@ -176,7 +176,7 @@ export function ModernBookingFlow({ service, onComplete }: ModernBookingFlowProp
           />
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 3 && selectedDate && selectedTime && (
           <PaymentWrapper
             amount={service.price}
             onSuccess={handlePaymentSuccess}
