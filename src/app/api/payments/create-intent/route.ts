@@ -24,12 +24,28 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { amount, serviceId, providerId, date, time } = body;
 
+    // Get the provider's stripe account id
+    const provider = await db.query.users.findFirst({
+      where: eq(users.id, providerId)
+    });
+
+    if (!provider || !provider.stripeConnectAccountId || !provider.stripeAccountEnabled) {
+      return NextResponse.json({ error: 'Provider not found or not connected to Stripe' }, { status: 404 });
+    }
+
+    // Calculate platform fee (20%)
+    const platformFee = Math.round(amount * 100 * 0.2);
+
     // Create a payment intent with the booking details in metadata
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(amount * 100), // Convert to cents
       currency: 'usd',
       automatic_payment_methods: {
         enabled: true,
+      },
+      application_fee_amount: platformFee, // Platform fee
+      transfer_data: {
+        destination: provider.stripeConnectAccountId, // Transfer to provider's connected account
       },
       metadata: {
         userId: dbUser.id, // Use our database user ID
