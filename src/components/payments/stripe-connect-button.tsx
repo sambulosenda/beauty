@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2 } from 'lucide-react'
+import React from 'react'
+
 
 interface StripeConnectButtonProps {
   isConnected: boolean
@@ -34,7 +36,7 @@ export function StripeConnectButton({
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Failed to connect with Stripe. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to connect with Stripe. Please try again.',
         variant: 'destructive',
       })
     } finally {

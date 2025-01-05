@@ -6,15 +6,20 @@ import { PaymentForm } from './payment-form';
 import { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import React from 'react';
+
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface PaymentWrapperProps {
   amount: number;
   onSuccess: (paymentIntentId: string) => void;
   bookingDetails: {
-    service: any;
-    date: Date | null;
-    time: string | null;
+    service: {
+      id: string;
+      providerId: string;
+      name: string;
+    };
+    date: Date;
+    time: string;
   };
 }
 
@@ -23,6 +28,11 @@ export function PaymentWrapper({ amount, onSuccess, bookingDetails }: PaymentWra
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!amount || amount <= 0) {
+      setError('Invalid amount');
+      return;
+    }
+
     fetch('/api/payments/create-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -61,7 +71,7 @@ export function PaymentWrapper({ amount, onSuccess, bookingDetails }: PaymentWra
   }
 
   if (!clientSecret) {
-    return <div>Loading payment form...</div>;
+    return <div className="text-center p-4">Loading payment form...</div>;
   }
 
   return (
@@ -81,6 +91,7 @@ export function PaymentWrapper({ amount, onSuccess, bookingDetails }: PaymentWra
         <PaymentForm
           amount={amount}
           onSuccess={handlePaymentSuccess}
+          bookingDetails={bookingDetails}
         />
       </Elements>
     </div>
