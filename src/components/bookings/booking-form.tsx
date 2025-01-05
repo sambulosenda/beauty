@@ -187,7 +187,7 @@ export default function BookingForm({
     )
   }
 
-  if (showPayment && bookingId) {
+  if (showPayment && bookingId && selectedDate && selectedTime) {
     return (
       <PaymentWrapper
         amount={parseFloat(service.price)}
