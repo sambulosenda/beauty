@@ -214,7 +214,7 @@ export default function BookingSteps({ serviceId, onComplete }: BookingStepsProp
           />
         )}
 
-        {currentStep === 2 && service && (
+        {currentStep === 2 && service && selectedDate && selectedTime && (
           <PaymentWrapper
             amount={parseFloat(service.price)}
             onSuccess={handlePaymentSuccess}
