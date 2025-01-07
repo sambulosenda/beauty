@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { CalendarDays, User, LogIn } from 'lucide-react'
+import React from "react"
 
 export function NavbarAuth() {
   const { isSignedIn, user } = useUser()
@@ -21,7 +22,11 @@ export function NavbarAuth() {
       <div className="flex items-center gap-2 sm:gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="hidden sm:flex text-[15px]">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="hidden sm:flex text-[15px] hover:bg-gradient-to-r hover:from-[#8AB861]/10 hover:to-[#E87C3E]/10"
+            >
               <CalendarDays className="w-4 h-4 mr-2" />
               <span className="hidden md:inline">Bookings</span>
             </Button>
@@ -46,7 +51,7 @@ export function NavbarAuth() {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="hidden sm:flex text-[15px]"
+            className="hidden sm:flex text-[15px] hover:bg-gradient-to-r hover:from-[#8AB861]/10 hover:to-[#E87C3E]/10"
             asChild
           >
             <Link href="/dashboard">
@@ -63,7 +68,7 @@ export function NavbarAuth() {
               avatarBox: "h-8 w-8",
               userButtonPopoverCard: "w-[240px]",
               userButtonPopoverActionButton: 
-                "hover:bg-rose-50 hover:text-rose-600 text-[15px]",
+                "hover:bg-gradient-to-r hover:from-[#8AB861]/10 hover:to-[#E87C3E]/10 text-[15px]",
               userButtonPopoverActionButtonText: "text-[15px]",
               userButtonPopoverFooter: "hidden",
             },
@@ -76,26 +81,24 @@ export function NavbarAuth() {
   return (
     <div className="flex items-center gap-2 sm:gap-4">
       <SignInButton mode="modal">
-        <Button size="sm" variant="ghost" className="hidden sm:flex text-[15px]">
+        <Button 
+          size="sm" 
+          variant="ghost" 
+          className="hidden sm:flex text-[15px] hover:bg-gradient-to-r hover:from-[#8AB861]/10 hover:to-[#E87C3E]/10"
+        >
           <LogIn className="w-4 h-4 mr-2" />
           <span className="hidden md:inline">Sign In</span>
         </Button>
       </SignInButton>
       
       <div className="hidden sm:flex gap-2">
-        <Link href="/sign-up" passHref legacyBehavior>
-          <Button size="sm" variant="outline" className="text-[15px]">
-            Sign Up
-          </Button>
-        </Link>
-        <Link href="/business" passHref legacyBehavior>
+        <Link href="/sign-up">
           <Button 
             size="sm" 
-            variant="default" 
-            className="bg-rose-600 hover:bg-rose-700 text-white text-[15px]"
-          
+            variant="outline" 
+            className="text-[15px] border-[#8AB861] text-[#8AB861] hover:bg-[#8AB861]/10"
           >
-           For Businesses
+            Sign Up
           </Button>
         </Link>
       </div>
