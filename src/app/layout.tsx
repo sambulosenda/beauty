@@ -19,7 +19,8 @@ import { usePathname } from 'next/navigation'
 import { Footer } from '@/components/layout/footer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
-
+import React
+ from 'react'
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isDashboard = pathname?.startsWith('/dashboard')
