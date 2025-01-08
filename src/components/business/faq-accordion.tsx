@@ -4,7 +4,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-
+import React
+ from "react"
 interface FAQAccordionProps {
   items: {
     question: string

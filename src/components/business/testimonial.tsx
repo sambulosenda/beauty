@@ -22,7 +22,7 @@ export function Testimonial({ quote, author, role, image, rating }: TestimonialP
         ))}
       </div>
       <blockquote className="text-gray-700 mb-6">
-        "{quote}"
+        &ldquo;{quote}&rdquo;
       </blockquote>
       <div className="flex items-center gap-4">
         <Image

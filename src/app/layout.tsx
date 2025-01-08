@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import Navbar from '@/components/layout/nav'
 import { Outfit } from 'next/font/google'
+import { Toaster } from 'sonner'
 
 const metadata = {
   title: 'Beauty Booking',
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {!isDashboard && <Navbar />}
           {children}
           {!isDashboard && <Footer />}
+          <Toaster />
         </body>
       </html>
       </QueryClientProvider>
