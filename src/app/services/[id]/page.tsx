@@ -41,16 +41,14 @@ interface Availability {
   isAvailable: boolean;
 }
 
-function useService(serviceId: string | Promise<string>) {
-  const resolvedId = typeof serviceId === 'string' ? serviceId : React.use(serviceId);
-  
+function useService(serviceId: string) {
   return useQuery<Service>({
-    queryKey: ["service", resolvedId],
+    queryKey: ["service", serviceId],
     queryFn: async () => {
-      console.log('Fetching service data for:', resolvedId);
+      console.log('Fetching service data for:', serviceId);
       
       // First fetch the service to get the providerId
-      const serviceResponse = await fetch(`/api/services/${resolvedId}`);
+      const serviceResponse = await fetch(`/api/services/${serviceId}`);
       const service = await serviceResponse.json();
       
       if (!service.providerId) {
@@ -83,11 +81,11 @@ function useService(serviceId: string | Promise<string>) {
 }
 
 interface ServicePageProps {
-  params: { id: string } | Promise<{ id: string }>;
+  params: Promise<{ id: string }>;
 }
 
-export default function ServicePage({ params }: ServicePageProps) {
-  const id = React.use(params instanceof Promise ? params : Promise.resolve(params)).id;
+export default async function ServicePage({ params }: ServicePageProps) {
+  const { id } = await params;
   const { data: service, isLoading, error } = useService(id);
 
   if (isLoading) return <ServiceDetailSkeleton />;
