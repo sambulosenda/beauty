@@ -1,3 +1,4 @@
+import React from "react"
 import { Metadata } from "next"
 import { ServicesPageContent } from "@/components/services/services-page-content"
 
@@ -18,15 +19,27 @@ interface ServicesPageProps {
 }
 
 export default async function ServicesPage({ searchParams }: ServicesPageProps) {
-  // Await the searchParams
-  const rawParams = await searchParams
+  try {
+    // Await and validate the searchParams
+    const rawParams = await searchParams
 
-  // Ensure searchParams are handled properly
-  const validatedParams: SearchParams = {
-    search: typeof rawParams.search === 'string' ? rawParams.search : undefined,
-    location: typeof rawParams.location === 'string' ? rawParams.location : undefined,
-    category: typeof rawParams.category === 'string' ? rawParams.category : undefined,
+    // Ensure searchParams are handled properly with type safety
+    const validatedParams: SearchParams = {
+      search: typeof rawParams.search === 'string' && rawParams.search.length > 0 
+        ? rawParams.search 
+        : undefined,
+      location: typeof rawParams.location === 'string' && rawParams.location.length > 0 
+        ? rawParams.location 
+        : undefined,
+      category: typeof rawParams.category === 'string' && rawParams.category.length > 0 
+        ? rawParams.category 
+        : undefined,
+    }
+
+    return <ServicesPageContent searchParams={validatedParams} />
+  } catch (error) {
+    console.error('Error processing search params:', error)
+    // Return with empty params if there's an error
+    return <ServicesPageContent searchParams={{}} />
   }
-
-  return <ServicesPageContent searchParams={validatedParams} />
 }

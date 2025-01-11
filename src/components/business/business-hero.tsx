@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { MapPin, Clock, Star } from 'lucide-react'
+import React from 'react'
 
 interface BusinessHeroProps {
   business: {

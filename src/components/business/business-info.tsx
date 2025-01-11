@@ -1,3 +1,5 @@
+import React from "react"
+
 interface BusinessInfoProps {
   business: {
     description: string | null

@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import Navbar from '@/components/layout/nav'
 import { Outfit } from 'next/font/google'
+import { Toaster } from 'sonner'
 
 const metadata = {
   title: 'Beauty Booking',
@@ -19,7 +20,8 @@ import { usePathname } from 'next/navigation'
 import { Footer } from '@/components/layout/footer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
-
+import React
+ from 'react'
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isDashboard = pathname?.startsWith('/dashboard')
@@ -33,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {!isDashboard && <Navbar />}
           {children}
           {!isDashboard && <Footer />}
+          <Toaster />
         </body>
       </html>
       </QueryClientProvider>
