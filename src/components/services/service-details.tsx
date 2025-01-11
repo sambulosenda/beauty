@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Clock, DollarSign } from "lucide-react";
 import { formatCurrency, formatDuration } from "@/lib/utils";
+import React from "react";
+
 
 interface ServiceDetailsProps {
   service: {
