@@ -76,7 +76,7 @@ export function DataTable<TData, TValue>({
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                  </TableHead>
+                  </TableHead> 
                 ))}
               </TableRow>
             ))}

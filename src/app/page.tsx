@@ -1,13 +1,14 @@
 "use client";
 
 import { useProviders } from "@/hooks/queries/use-providers";
-import { Star, MapPin, Award, Clock, Search, ArrowRight } from "lucide-react";
+import { Star, Award, Clock, Search, ArrowRight, Play, Calendar, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Head from "next/head";
 import { useState } from "react";
 import { ProviderCard } from "@/components/provider-card";
 import React from "react";
+import Link from "next/link";
 
 export default function Home() {
   const [treatment, setTreatment] = useState("");
@@ -48,7 +49,7 @@ export default function Home() {
                 {/* Main Heading */}
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-6">
                   <span className="block mb-2">Discover and Book</span>
-                  <span className="bg-gradient-to-r from-rose-300 via-rose-400 to-pink-500 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-[#8AB861] via-[#97C26B] to-[#E87C3E] bg-clip-text text-transparent">
                     Beauty & Wellness Services
                   </span>
                 </h1>
@@ -67,24 +68,14 @@ export default function Home() {
                         <Input
                           type="text"
                           placeholder="Search treatments..."
-                          className="w-full pl-12 h-14 bg-white/80 border-0 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-rose-500"
+                          className="w-full pl-12 h-14 bg-white/80 border-0 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#8AB861]"
                           value={treatment}
                           onChange={(e) => setTreatment(e.target.value)}
                         />
                       </div>
-                      <div className="relative flex-1">
-                        <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                        <Input
-                          type="text"
-                          placeholder="Location"
-                          className="w-full pl-12 h-14 bg-white/80 border-0 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-rose-500"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                        />
-                      </div>
-                      <Button
-                        type="submit"
-                        className="h-14 px-8 bg-rose-500 hover:bg-rose-600 text-white font-semibold rounded-xl transition-colors sm:w-auto w-full"
+                      <Button 
+                        type="submit" 
+                        className="h-14 px-8 bg-gradient-to-r from-[#8AB861] to-[#E87C3E] hover:from-[#7BA754] hover:to-[#D66F37] text-white font-medium rounded-xl"
                       >
                         Search
                       </Button>
@@ -211,48 +202,119 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Professional CTA Section - Improved Mobile Responsiveness */}
-        <section className="relative bg-gray-900 py-12 sm:py-24 overflow-hidden">
-          <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-              <div className="relative z-10">
-                <span className="inline-block rounded-full bg-white/10 px-3 sm:px-4 py-1.5 text-sm font-medium text-white mb-4 sm:mb-6">
-                  For Professionals
-                </span>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-                  Own a beauty business?
-                  <span className="block mt-2">Let&apos;s grow together.</span>
-                </h2>
-                <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-300 leading-relaxed">
-                  Expand your client base and streamline your operations with
-                  our intuitive salon management software.
-                </p>
-                <Button className="mt-6 sm:mt-8 bg-white text-gray-900 hover:bg-gray-100 font-semibold px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg rounded-full transition-colors">
-                  Partner with us
-                </Button>
+        {/* Business Section */}
+        <section className="relative py-24 sm:py-32 overflow-hidden">
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+          
+          {/* Decorative Elements */}
+          <div className="absolute inset-0 opacity-25">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255,255,255,0.2) 2px, transparent 0)`,
+              backgroundSize: '50px 50px'
+            }} />
+          </div>
+
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              {/* Left Column - Content */}
+              <div className="space-y-8">
+                {/* Animated Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 border border-[#8AB861]/20 backdrop-blur-sm">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8AB861] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-[#8AB861]"></span>
+                  </span>
+                  <span className="text-sm font-medium bg-gradient-to-r from-[#8AB861] to-[#E87C3E] bg-clip-text text-transparent">
+                    For Beauty Professionals
+                  </span>
+                </div>
+
+                {/* Main Content */}
+                <div className="space-y-6">
+                  <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+                    Ready to grow your
+                    <span className="block mt-2 bg-gradient-to-r from-[#8AB861] via-[#97C26B] to-[#E87C3E] bg-clip-text text-transparent">
+                      beauty business?
+                    </span>
+                  </h2>
+
+                  <p className="text-xl text-gray-300 leading-relaxed max-w-xl">
+                    Join thousands of beauty professionals who are scaling their business with our all-in-one platform.
+                  </p>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-3 gap-6">
+                  {[
+                    { number: '500+', label: 'Active Pros' },
+                    { number: '50K+', label: 'Bookings' },
+                    { number: '4.9/5', label: 'Rating' },
+                  ].map((stat, index) => (
+                    <div key={index} className="text-center p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                      <div className="text-2xl font-bold text-white">{stat.number}</div>
+                      <div className="text-sm text-gray-400">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTAs */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    asChild
+                    size="lg"
+                    className="bg-gradient-to-r from-[#8AB861] to-[#E87C3E] hover:opacity-90 text-white rounded-full px-8 py-6"
+                  >
+                    <Link href="/business-signup">
+                      Start Free Trial
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  
+                  <Button 
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-white/20 bg-white/5 text-white rounded-full px-8 py-6 hover:bg-white/10"
+                  >
+                    <Play className="mr-2 h-5 w-5" />
+                    Watch Demo
+                  </Button>
+                </div>
               </div>
 
-              <div className="relative hidden lg:block">
-                <div className="relative bg-white/10 p-8 rounded-xl border border-white/20">
-                  <h3 className="text-2xl font-semibold mb-4 text-white">
-                    Salon Dashboard
-                  </h3>
-                  <div className="space-y-4">
-                    {[
-                      "Appointments",
-                      "Client Management",
-                      "Inventory",
-                      "Analytics",
-                    ].map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
-                      >
-                        <div className="w-4 h-4 rounded-full bg-white/40 mr-3"></div>
-                        <span className="text-white">{item}</span>
+              {/* Right Column - Feature Cards */}
+              <div className="relative">
+                <div className="grid gap-4">
+                  {[
+                    {
+                      title: 'Smart Scheduling',
+                      description: 'AI-powered booking system that maximizes your availability',
+                      icon: Calendar,
+                      gradient: 'from-[#8AB861] to-[#97C26B]'
+                    },
+                    {
+                      title: 'Instant Payments',
+                      description: 'Secure payment processing with same-day deposits',
+                      icon: CreditCard,
+                      gradient: 'from-[#97C26B] to-[#E87C3E]'
+                    },
+                    // Add more features as needed
+                  ].map((feature, index) => (
+                    <div
+                      key={index}
+                      className="group p-6 rounded-2xl bg-white/[0.03] border border-white/[0.05] backdrop-blur-sm hover:bg-white/[0.08] transition-all duration-300"
+                    >
+                      <div className="flex gap-4">
+                        <div className={`p-3 rounded-xl bg-gradient-to-r ${feature.gradient} group-hover:scale-110 transition-transform duration-300`}>
+                          <feature.icon className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-white text-lg mb-2">{feature.title}</h3>
+                          <p className="text-gray-400">{feature.description}</p>
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

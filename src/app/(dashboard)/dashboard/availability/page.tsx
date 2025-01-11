@@ -4,6 +4,7 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import AvailabilityForm from './availability-form'
+import React from 'react'
 
 export default async function AvailabilityPage() {
   const { userId } = await auth()

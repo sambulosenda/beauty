@@ -1,8 +1,7 @@
 "use client"
 import { notFound } from "next/navigation";
 import { formatCurrency, formatDuration } from "@/lib/utils";
-import { Suspense } from "react";
-import { Clock, MapPin, Star, Shield, ArrowLeft, Calendar, Check } from "lucide-react";
+import { Clock, MapPin, Star, Shield, ArrowLeft, Calendar, Check, Info, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { ServiceDetailSkeleton } from "@/components/services/service-detail-skeleton";
@@ -10,9 +9,40 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React from "react";
+import Image from "next/image";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { cn } from "@/lib/utils";
+
+interface ServiceProvider {
+  id: string;
+  name: string;
+  businessName?: string;
+  image?: string;
+  address?: string;
+}
+
+interface Service {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  duration: number;
+  category: string;
+  image?: string;
+  rating?: number;
+  reviewCount?: number;
+  provider?: ServiceProvider;
+  providerId: string;
+  availableDays?: string[];
+}
+
+interface Availability {
+  dayOfWeek: string;
+  isAvailable: boolean;
+}
 
 function useService(serviceId: string) {
-  return useQuery({
+  return useQuery<Service>({
     queryKey: ["service", serviceId],
     queryFn: async () => {
       console.log('Fetching service data for:', serviceId);
@@ -33,8 +63,8 @@ function useService(serviceId: string) {
       
       const availableDays = Array.isArray(availability) 
         ? availability
-            .filter((a: any) => a.isAvailable)
-            .map((a: any) => a.dayOfWeek)
+            .filter((a: Availability) => a.isAvailable)
+            .map((a: Availability) => a.dayOfWeek)
         : [];
       
       console.log('Filtered available days:', availableDays);
@@ -54,211 +84,269 @@ interface ServicePageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function ServicePage({ params }: ServicePageProps) {
-  const id = (params as any).id;
+export default async function ServicePage({ params }: ServicePageProps) {
+  const { id } = await params;
   const { data: service, isLoading, error } = useService(id);
 
   if (isLoading) return <ServiceDetailSkeleton />;
   if (error || !service) return notFound();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-50 bg-white border-b">
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/services" className="flex items-center text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Services
-            </Link>
-            <div className="flex items-center gap-4">
-              <span className="text-2xl font-bold text-rose-600">
-                {formatCurrency(parseFloat(service.price))}
-              </span>
+          <div className="py-4">
+            <div className="flex items-center justify-between">
+              <Link 
+                href="/services" 
+                className="inline-flex items-center text-gray-300 hover:text-white transition-colors group text-sm"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                Back to Services
+              </Link>
               <Link href={`/services/${id}/book`}>
-                <Button size="lg">Book Now</Button>
+                <Button 
+                  size="sm"
+                  className="bg-[#8AB861] hover:bg-[#7da456] text-white rounded-full px-6"
+                >
+                  Book Now
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </Link>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Service Image and Basic Info */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-              {service.image && (
-                <div className="relative h-[400px]">
-                  <img
-                    src={service.image}
-                    alt={service.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                </div>
-              )}
-              
-              <div className="p-8">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="secondary">{service.category}</Badge>
-                      <div className="flex items-center text-amber-500">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span className="ml-1 text-sm text-gray-600">
-                          {service.rating || '4.8'} ({service.reviewCount || '24'} reviews)
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Service Image */}
+              <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+                {service.image ? (
+                  <AspectRatio ratio={16 / 9} className="bg-muted">
+                    <Image
+                      src={service.image}
+                      alt={service.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw"
+                      priority
+                    />
+                  </AspectRatio>
+                ) : (
+                  <div className="bg-gradient-to-r from-[#8AB861]/10 to-[#E87C3E]/10 h-[400px] flex items-center justify-center">
+                    <Info className="w-12 h-12 text-[#8AB861]" />
+                  </div>
+                )}
+              </div>
+
+              {/* Tabbed Content */}
+              <div className="bg-white rounded-2xl border border-gray-100">
+                <Tabs defaultValue="details" className="p-6">
+                  <TabsList className="grid w-full grid-cols-3 mb-6">
+                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="included">What&apos;s Included</TabsTrigger>
+                    <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="details" className="space-y-6">
+                    <div className="prose prose-rose max-w-none">
+                      <h2 className="text-xl font-semibold text-gray-900">About this service</h2>
+                      <p className="text-gray-600 leading-relaxed">
+                        {service.description}
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-[#8AB861]/10 to-[#E87C3E]/10 border border-[#8AB861]/20">
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 flex items-center justify-center flex-shrink-0">
+                          <Clock className="w-5 h-5 text-[#8AB861]" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">Duration</h3>
+                          <p className="text-sm text-gray-600">{formatDuration(service.duration)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-[#8AB861]/10 to-[#E87C3E]/10 border border-[#8AB861]/20">
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 flex items-center justify-center flex-shrink-0">
+                          <Calendar className="w-5 h-5 text-[#8AB861]" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">Availability</h3>
+                          <p className="text-sm text-gray-600">
+                            {(service.availableDays ?? []).length} days per week
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="included" className="space-y-4">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-3">What&apos;s Included</h2>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        "Professional consultation",
+                        "Premium products used",
+                        "Aftercare advice",
+                        "Complimentary drinks"
+                      ].map((item) => (
+                        <li key={item} className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-[#8AB861]/10 to-[#E87C3E]/10 border border-[#8AB861]/20">
+                          <div className="h-10 w-10 rounded-xl bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 flex items-center justify-center flex-shrink-0">
+                            <Check className="w-5 h-5 text-[#8AB861]" />
+                          </div>
+                          <span className="text-gray-700">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </TabsContent>
+                  
+                  <TabsContent value="reviews" className="space-y-4">
+                    <div className="text-center py-12">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 flex items-center justify-center mx-auto mb-4">
+                        <Star className="w-6 h-6 text-[#8AB861]" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Reviews Coming Soon</h3>
+                      <p className="text-gray-500 max-w-md mx-auto">
+                        We&apos;re collecting reviews from verified customers. Check back soon to see what others are saying about this service.
+                      </p>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
+                {/* Booking Card */}
+                <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Book this Service</h2>
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl bg-gradient-to-r from-[#8AB861]/10 to-[#E87C3E]/10 border border-[#8AB861]/20">
+                        <div className="flex items-center text-[#8AB861]">
+                          <Shield className="w-5 h-5 mr-2" />
+                          <span className="text-sm font-medium">100% Secure Booking</span>
+                        </div>
+                      </div>
+                      
+                      {/* Available Days */}
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 mb-2">Available Days</h3>
+                        {(service.availableDays ?? []).length > 0 ? (
+                          <div className="grid grid-cols-3 gap-2">
+                            {(service.availableDays ?? []).map((day) => (
+                              <Badge
+                                key={day}
+                                variant="secondary"
+                                className={cn(
+                                  "justify-center py-2 hover:bg-gradient-to-r hover:from-[#8AB861]/20 hover:to-[#E87C3E]/20 transition-all cursor-pointer",
+                                  "border border-[#8AB861]/20"
+                                )}
+                              >
+                                {day.slice(0, 3)}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-500 bg-gradient-to-r from-[#8AB861]/10 to-[#E87C3E]/10 p-4 rounded-xl border border-[#8AB861]/20">
+                            No available days set for this service. Please contact the provider.
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Service Price</span>
+                        <span className="text-lg font-semibold text-gray-900">
+                          {formatCurrency(parseFloat(service.price))}
                         </span>
                       </div>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                      {service.name}
-                    </h1>
-                    <div className="flex items-center gap-4 text-gray-600">
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {formatDuration(service.duration)}
+                  </div>
+
+                  <div className="p-6">
+                    <Link href={`/services/${id}/book`} className="block">
+                      <Button 
+                        size="lg" 
+                        className="w-full group bg-gradient-to-r from-[#8AB861] to-[#E87C3E] hover:opacity-90 text-white rounded-full transition-all duration-300 hover:scale-105"
+                      >
+                        Book Now
+                        <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                    <p className="text-xs text-center text-gray-500 mt-3">
+                      Free cancellation up to 24 hours before your appointment
+                    </p>
+                  </div>
+                </div>
+
+                {/* Provider Card */}
+                <div className="bg-white rounded-2xl overflow-hidden border border-gray-100">
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-4">About the Provider</h2>
+                    <div className="flex items-start space-x-4">
+                      <div className="h-16 w-16 rounded-xl bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {service.provider?.image ? (
+                          <Image
+                            src={service.provider.image}
+                            alt={service.provider.name}
+                            width={64}
+                            height={64}
+                            className="h-16 w-16 rounded-xl object-cover"
+                          />
+                        ) : (
+                          <span className="text-2xl font-semibold text-[#8AB861]">
+                            {service.provider?.name?.[0]}
+                          </span>
+                        )}
                       </div>
-                      <div className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {service.provider?.businessName || service.provider?.name}
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {service.provider?.businessName || service.provider?.name}
+                        </h3>
+                        <div className="flex items-center mt-1 text-gray-500">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          <span className="text-sm">
+                            {service.provider?.address || 'Location available after booking'}
+                          </span>
+                        </div>
                       </div>
+                    </div>
+                  </div>
+                  <div className="px-6 py-4 bg-gradient-to-r from-[#8AB861]/10 to-[#E87C3E]/10 border-t border-[#8AB861]/20">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Response Time</span>
+                      <span className="font-medium text-gray-900">Usually within 1 hour</span>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Tabbed Content */}
-            <div className="bg-white rounded-2xl shadow-sm">
-              <Tabs defaultValue="details" className="p-6">
-                <TabsList className="grid w-full grid-cols-3 mb-6">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  <TabsTrigger value="included">What's Included</TabsTrigger>
-                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="details" className="space-y-4">
-                  <h2 className="text-xl font-semibold mb-3">About this service</h2>
-                  <p className="text-gray-600 leading-relaxed">
-                    {service.description}
-                  </p>
-                  
-                  <div className="mt-6 grid grid-cols-2 gap-4">
-                    <div className="flex items-start gap-3 p-4 rounded-lg bg-gray-50">
-                      <Clock className="w-5 h-5 text-gray-400 mt-1" />
-                      <div>
-                        <h3 className="font-medium">Duration</h3>
-                        <p className="text-sm text-gray-600">{formatDuration(service.duration)}</p>
+                {/* Trust Indicators */}
+                <div className="bg-white/50 rounded-2xl border border-[#8AB861]/20">
+                  <ul className="space-y-4">
+                    <li className="flex items-center gap-3 text-sm text-gray-600">
+                      <div className="h-8 w-8 rounded-xl bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-4 h-4 text-[#8AB861]" />
                       </div>
-                    </div>
-                    <div className="flex items-start gap-3 p-4 rounded-lg bg-gray-50">
-                      <Calendar className="w-5 h-5 text-gray-400 mt-1" />
-                      <div>
-                        <h3 className="font-medium">Availability</h3>
-                        <p className="text-sm text-gray-600">
-                          {service.availableDays?.length} days per week
-                        </p>
+                      <span>Verified Professional</span>
+                    </li>
+                    <li className="flex items-center gap-3 text-sm text-gray-600">
+                      <div className="h-8 w-8 rounded-xl bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 flex items-center justify-center flex-shrink-0">
+                        <Shield className="w-4 h-4 text-[#8AB861]" />
                       </div>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="included" className="space-y-4">
-                  <h2 className="text-xl font-semibold mb-3">What's Included</h2>
-                  <ul className="grid grid-cols-2 gap-4">
-                    {[
-                      "Professional consultation",
-                      "Premium products used",
-                      "Aftercare advice",
-                      "Complimentary drinks"
-                    ].map((item) => (
-                      <li key={item} className="flex items-center gap-2">
-                        <Check className="w-5 h-5 text-green-500" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
+                      <span>Secure Payments</span>
+                    </li>
+                    <li className="flex items-center gap-3 text-sm text-gray-600">
+                      <div className="h-8 w-8 rounded-xl bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 flex items-center justify-center flex-shrink-0">
+                        <Star className="w-4 h-4 text-[#8AB861]" />
+                      </div>
+                      <span>Rated {service.rating || '4.8'}/5 by clients</span>
+                    </li>
                   </ul>
-                </TabsContent>
-                
-                <TabsContent value="reviews" className="space-y-4">
-                  {/* Reviews component here */}
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
-              {/* Booking Card */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">Book this Service</h2>
-                <div className="space-y-4">
-                  <div className="p-4 bg-rose-50 rounded-xl">
-                    <div className="flex items-center text-rose-700">
-                      <Shield className="w-5 h-5 mr-2" />
-                      <span className="text-sm font-medium">Secure Booking</span>
-                    </div>
-                  </div>
-                  
-                  {/* Available Days */}
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Available Days</h3>
-                    {service.availableDays?.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        {service.availableDays.map((day: string) => (
-                          <Badge
-                            key={day}
-                            variant="secondary"
-                            className="justify-center"
-                          >
-                            {day.slice(0, 3)}
-                          </Badge>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-sm text-gray-500">
-                        No available days set for this service. Please contact the provider.
-                      </div>
-                    )}
-                  </div>
-                  
-                  <Link href={`/services/${id}/book`} className="block">
-                    <Button size="lg" className="w-full">
-                      Book Now
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Provider Card */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">About the Provider</h2>
-                <div className="flex items-start space-x-4">
-                  <div className="h-16 w-16 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
-                    {service.provider?.image ? (
-                      <img
-                        src={service.provider.image}
-                        alt={service.provider.name}
-                        className="h-16 w-16 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-2xl font-semibold text-rose-600">
-                        {service.provider?.name?.[0]}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {service.provider?.businessName || service.provider?.name}
-                    </h3>
-                    <div className="flex items-center mt-1 text-gray-500">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {service.provider?.address || 'Location available after booking'}
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>

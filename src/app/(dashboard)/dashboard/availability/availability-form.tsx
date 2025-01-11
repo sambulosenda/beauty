@@ -12,7 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useToast } from "@/hooks/use-toast"
+import { toast } from 'sonner'
+import React from 'react'
 
 const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
 const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => 
@@ -29,7 +30,6 @@ interface AvailabilityState {
 
 export default function AvailabilityForm({ providerId }: { providerId: string }) {
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
 
   const [availability, setAvailability] = useState<AvailabilityState>(() => {
     const initial: AvailabilityState = {}
@@ -68,11 +68,7 @@ export default function AvailabilityForm({ providerId }: { providerId: string })
         }
       } catch (error) {
         console.error('Error loading availability:', error)
-        toast({
-          title: 'Error',
-          description: 'Failed to load availability settings',
-          variant: 'destructive'
-        })
+        toast.error('Failed to load availability settings')
       }
     }
 
@@ -104,17 +100,10 @@ export default function AvailabilityForm({ providerId }: { providerId: string })
       const savedData = await response.json()
       console.log('Saved successfully:', savedData)
       
-      toast({
-        title: 'Success',
-        description: 'Availability settings updated',
-      })
+      toast('Availability settings updated')
     } catch (error) {
       console.error('Error saving availability:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to update availability settings',
-        variant: 'destructive'
-      })
+      toast.error('Failed to update availability settings')
     } finally {
       setIsLoading(false)
     }
