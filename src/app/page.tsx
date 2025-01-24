@@ -115,9 +115,9 @@ export default function Home() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {data?.providers.map((provider) => (
+                {data?.providers.map((provider, index) => (
                   <div key={provider.id}>
-                    <ProviderCard provider={provider} />
+                    <ProviderCard provider={provider} index={index} />
                   </div>
                 ))}
               </div>
