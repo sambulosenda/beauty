@@ -1,94 +1,103 @@
+'use client'
+
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { 
-  Heart, 
-  Users, 
-  Target, 
-  Shield,
-  ArrowRight,
-  CheckCircle2
-} from 'lucide-react'
+import { Heart, Users, Target, Shield, ArrowRight, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import React from 'react'
 
-export const metadata = {
-  title: 'About Us | BeautyBook',
-  description: 'Learn about our mission to transform the beauty industry and empower beauty professionals worldwide.',
+interface ValueCardProps {
+  icon: React.ElementType
+  title: string
+  description: string
+  gradient: string
 }
+
+const ValueCard = ({ icon: Icon, title, description, gradient }: ValueCardProps) => (
+  <div className="group p-6 rounded-xl bg-white border border-gray-100 hover:border-[#8AB861]/30 transition-all duration-300">
+    <div className={cn(
+      "inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r mb-4",
+      gradient
+    )}>
+      <Icon className="h-6 w-6 text-white" />
+    </div>
+    <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
+    <p className="text-gray-600 leading-relaxed">{description}</p>
+  </div>
+)
+
+const StatCard = ({ value, label }: { value: string, label: string }) => (
+  <div className="text-center px-6 py-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+    <div className="text-2xl font-bold text-white mb-1">{value}</div>
+    <div className="text-sm text-gray-300">{label}</div>
+  </div>
+)
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="absolute inset-0 opacity-25">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
         </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 border border-[#8AB861]/20 backdrop-blur-sm mb-6">
-              <span className="text-sm font-medium bg-gradient-to-r from-[#8AB861] to-[#E87C3E] bg-clip-text text-transparent">
-                Our Story
-              </span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+          <div className="flex flex-col md:flex-row gap-8 items-center">
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-white mb-4">
+                About BeautyBook
+              </h1>
+              <p className="text-xl text-gray-300">
+                Connecting Black and African beauty professionals with clients through a platform that celebrates culture and expertise.
+              </p>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-              Transforming the Beauty Industry
-              <span className="block mt-2 bg-gradient-to-r from-[#8AB861] via-[#97C26B] to-[#E87C3E] bg-clip-text text-transparent">
-                One Booking at a Time
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-300 mb-8">
-              We&apos;re on a mission to empower beauty professionals with the tools they need to succeed in the digital age.
-            </p>
+            <div className="flex gap-4">
+              <StatCard value="100+" label="Partner Businesses" />
+              <StatCard value="4.9/5" label="Client Rating" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* Mission Section */}
-      <section className="py-24 bg-white relative">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 border border-[#8AB861]/20 backdrop-blur-sm mb-6">
-                <span className="text-sm font-medium bg-gradient-to-r from-[#8AB861] to-[#E87C3E] bg-clip-text text-transparent">
-                  Our Mission
-                </span>
+              <div className="inline-block px-4 py-2 rounded-full bg-[#8AB861]/10 text-[#8AB861] text-sm font-medium mb-6">
+                Our Mission
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Making Beauty Business Management Simple
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                Redefining Beauty Access for Our Communities
               </h2>
-              <p className="text-lg text-gray-600 mb-8">
-                We believe that every beauty professional deserves access to powerful tools that can help them grow their business. Our platform is designed to eliminate the complexities of business management, allowing you to focus on what you do best - creating beauty.
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                We're dedicated to empowering Black and African beauty businesses by providing innovative tools and fostering a supportive community that celebrates cultural beauty traditions.
               </p>
-              <div className="space-y-4">
+              <div className="grid gap-4">
                 {[
-                  "Empowering beauty professionals worldwide",
-                  "Simplifying business management",
-                  "Creating meaningful connections",
-                  "Driving industry innovation"
+                  "Connecting clients with skilled professionals",
+                  "Preserving cultural beauty traditions",
+                  "Providing growth tools for businesses",
+                  "Creating seamless booking experiences"
                 ].map((item, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-[#8AB861]" />
+                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                    <CheckCircle2 className="h-5 w-5 text-[#8AB861] flex-shrink-0 mt-0.5" />
                     <span className="text-gray-700">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-square rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 -left-4 -top-4 bg-[#8AB861]/10 rounded-lg transform rotate-3" />
+              <div className="relative rounded-lg overflow-hidden shadow-lg">
                 <Image
-                  src="/images/about-mission.jpg"
+                  src="/images/home-banner.png"
                   alt="Our Mission"
-                  fill
-                  className="object-cover"
+                  width={600}
+                  height={400}
+                  className="w-full h-[400px] object-cover"
                 />
-              </div>
-              <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-xl">
-                <div className="text-4xl font-bold text-gray-900 mb-2">5000+</div>
-                <div className="text-gray-600">Happy Professionals</div>
               </div>
             </div>
           </div>
@@ -96,20 +105,15 @@ export default function AboutPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-24 bg-gray-50/50 relative">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 border border-[#8AB861]/20 backdrop-blur-sm mb-6">
-              <span className="text-sm font-medium bg-gradient-to-r from-[#8AB861] to-[#E87C3E] bg-clip-text text-transparent">
-                Our Values
-              </span>
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-block px-4 py-2 rounded-full bg-[#8AB861]/10 text-[#8AB861] text-sm font-medium mb-6">
+              Our Values
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-              What Drives Us
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Our values shape everything we do, from product development to customer support.
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">What Drives Us Forward</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Our values are rooted in empowering beauty businesses through community, innovation, and trust.
             </p>
           </div>
 
@@ -117,151 +121,66 @@ export default function AboutPage() {
             {[
               {
                 icon: Heart,
-                title: "Customer First",
-                description: "Every decision we make starts with our customers' needs",
+                title: "Cultural Pride",
+                description: "Celebrating and preserving the rich traditions of Black and African beauty.",
                 gradient: "from-[#8AB861] to-[#97C26B]"
               },
               {
                 icon: Users,
                 title: "Community",
-                description: "Building strong connections within the beauty industry",
+                description: "Building strong connections between professionals and clients.",
                 gradient: "from-[#97C26B] to-[#E87C3E]"
               },
               {
                 icon: Target,
                 title: "Innovation",
-                description: "Constantly improving and evolving our platform",
+                description: "Creating tools tailored to unique cultural beauty needs.",
                 gradient: "from-[#8AB861] to-[#E87C3E]"
               },
               {
                 icon: Shield,
                 title: "Trust",
-                description: "Maintaining the highest standards of security and reliability",
+                description: "Ensuring a safe and reliable platform for all users.",
                 gradient: "from-[#E87C3E] to-[#8AB861]"
               }
             ].map((value, index) => (
-              <div
-                key={index}
-                className="group p-8 rounded-2xl bg-white border border-gray-100 hover:border-[#8AB861]/50 transition-all duration-300 hover:shadow-xl"
-              >
-                <div className={cn(
-                  "inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r mb-6 group-hover:scale-110 transition-transform duration-300",
-                  value.gradient
-                )}>
-                  <value.icon className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                  {value.title}
-                </h3>
-                <p className="text-gray-600">
-                  {value.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section className="py-24 bg-white relative">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#8AB861]/20 to-[#E87C3E]/20 border border-[#8AB861]/20 backdrop-blur-sm mb-6">
-              <span className="text-sm font-medium bg-gradient-to-r from-[#8AB861] to-[#E87C3E] bg-clip-text text-transparent">
-                Our Team
-              </span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-              Meet the Team Behind BeautyBook
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              A diverse group of passionate individuals working together to revolutionize the beauty industry.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Sarah Johnson",
-                role: "CEO & Founder",
-                image: "/team/sarah.jpg",
-                gradient: "from-[#8AB861] to-[#97C26B]"
-              },
-              {
-                name: "Michael Chen",
-                role: "Chief Technology Officer",
-                image: "/team/michael.jpg",
-                gradient: "from-[#97C26B] to-[#E87C3E]"
-              },
-              {
-                name: "Emma Davis",
-                role: "Head of Customer Success",
-                image: "/team/emma.jpg",
-                gradient: "from-[#8AB861] to-[#E87C3E]"
-              }
-            ].map((member, index) => (
-              <div
-                key={index}
-                className="group relative rounded-2xl bg-white border border-gray-100 overflow-hidden hover:border-[#8AB861]/50 transition-all duration-300 hover:shadow-xl"
-              >
-                <div className="aspect-[4/5] relative">
-                  <Image
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    {member.name}
-                  </h3>
-                  <p className="text-gray-600">{member.role}</p>
-                </div>
-              </div>
+              <ValueCard key={index} {...value} />
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="absolute inset-0 opacity-25">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-              Join Our Growing Community
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-300 mb-8">
-              Be part of the beauty industry&apos;s digital transformation
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg"
-                className="group bg-gradient-to-r from-[#8AB861] to-[#E87C3E] hover:opacity-90 text-white rounded-full px-8 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-                asChild
-              >
-                <Link href="/business-signup" className="flex items-center justify-center">
-                  Get Started Free
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-white/20 bg-white/5 text-white rounded-full px-8 hover:bg-white/10 transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-              >
-                Contact Us
-              </Button>
-            </div>
+      <section className="py-20 bg-white border-t border-gray-100">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            Ready to Join Our Community?
+          </h2>
+          <p className="text-lg text-gray-600 mb-8">
+            Be part of a movement that's transforming beauty access for Black and African professionals and clients.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              size="lg"
+              className="bg-[#8AB861] hover:bg-[#7da556] text-white rounded-xl px-8"
+            >
+              <Link href="/business-signup" className="flex items-center">
+                Get Started
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+            
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-gray-300 text-gray-700 rounded-xl px-8 hover:bg-gray-50"
+            >
+              Learn More
+            </Button>
           </div>
         </div>
       </section>
     </div>
   )
 }
-
