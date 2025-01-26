@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import BookingSteps from "./booking-steps"
 import { X } from "lucide-react"
+import React from "react"
+
 
 interface BookingDialogProps {
   serviceId: string
