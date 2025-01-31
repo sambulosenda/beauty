@@ -11,7 +11,6 @@ import {
   CreditCard,
   Loader2,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useCallback } from "react";
 import { ProviderCard } from "@/components/provider-card";
@@ -65,93 +64,68 @@ export default function Home() {
       <main className="relative">
         {/* Hero Section */}
         <section className="py-20 sm:py-32 bg-gradient-to-br from-gray-900 to-gray-800">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <h1 className="text-5xl sm:text-6xl font-bold text-white mb-8 tracking-tight">
-                <span className="block mb-3">Your Beauty Journey</span>
-                <span className="bg-gradient-to-r from-[#8AB861] via-[#97C26B] to-[#E87C3E] bg-clip-text text-transparent">
-                  Starts Here
-                </span>
-              </h1>
-
-              <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-12 leading-relaxed">
-                Book appointments with top beauty professionals in your area,
-                hassle-free
-              </p>
-
-              <div className="max-w-2xl mx-auto backdrop-blur-xl bg-white/10 p-4 rounded-2xl shadow-lg">
-                <form
-                  onSubmit={handleSearch}
-                  className="flex flex-col sm:flex-row gap-4"
-                >
-                  <div className="relative flex-1">
-                    <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    <Input
-                      type="text"
-                      name="treatment"
-                      placeholder="What service are you looking for?"
-                      className="w-full pl-12 h-14 bg-white/90 border-0 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#8AB861]"
-                      value={searchParams.treatment}
-                      onChange={handleInputChange}
-                      aria-label="Search treatments"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    disabled={isSearching}
-                    className="h-14 px-8 bg-gradient-to-r from-[#8AB861] to-[#E87C3E] text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-70"
-                  >
-                    {isSearching ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      "Search"
-                    )}
-                  </Button>
-                </form>
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl sm:text-6xl font-bold text-white mb-8 tracking-tight">
+            <span className="block mb-3">Your Beauty Journey</span>
+            <span className="bg-gradient-to-r from-[#8AB861] via-[#97C26B] to-[#E87C3E] bg-clip-text text-transparent">
+              Starts Here
+            </span>
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-12 leading-relaxed">
+            Book appointments with top beauty professionals in your area, hassle-free
+          </p>
+          <div className="max-w-2xl mx-auto backdrop-blur-xl bg-white/10 p-4 rounded-2xl shadow-lg">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  name="treatment"
+                  placeholder="What service are you looking for?"
+                  className="w-full pl-12 h-14 bg-white/90 border-0 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-[#8AB861]"
+                  value={searchParams.treatment}
+                  onChange={handleInputChange}
+                  aria-label="Search treatments"
+                />
               </div>
-
-              {/* Stats Section - Enhanced with animations */}
-              <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 text-white max-w-4xl mx-auto">
-                {[
-                  {
-                    icon: Star,
-                    title: "4.9/5 Rating",
-                    subtitle: "From verified reviews",
-                    delay: "0",
-                  },
-                  {
-                    icon: Award,
-                    title: "Expert Professionals",
-                    subtitle: "Carefully vetted",
-                    delay: "150",
-                  },
-                  {
-                    icon: Clock,
-                    title: "24/7 Booking",
-                    subtitle: "Book anytime",
-                    delay: "300",
-                  },
-                ].map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-4 p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 animate-fade-in"
-                    style={{ animationDelay: `${item.delay}ms` }}
-                  >
-                    <div className="p-3 rounded-full bg-white/10">
-                      <item.icon className="h-6 w-6 text-[#97C26B]" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-lg">{item.title}</div>
-                      <div className="text-sm text-gray-400">
-                        {item.subtitle}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+              <button
+                type="submit"
+                disabled={isSearching}
+                className="h-14 px-8 bg-gradient-to-r from-[#8AB861] to-[#E87C3E] text-white font-medium rounded-xl hover:opacity-90 transition-opacity disabled:opacity-70"
+              >
+                {isSearching ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Search"
+                )}
+              </button>
+            </form>
           </div>
-        </section>
+          {/* Stats Section - Enhanced with animations */}
+          <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-6 text-white max-w-4xl mx-auto">
+            {[{ icon: Star, title: "4.9/5 Rating", subtitle: "From verified reviews", delay: "0" },
+              { icon: Award, title: "Expert Professionals", subtitle: "Carefully vetted", delay: "150" },
+              { icon: Clock, title: "24/7 Booking", subtitle: "Book anytime", delay: "300" }]
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-4 p-6 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300"
+                  style={{ animationDelay: `${item.delay}ms` }}
+                >
+                  <div className="p-3 rounded-full bg-white/10">
+                    <item.icon className="h-6 w-6 text-[#97C26B]" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-lg">{item.title}</div>
+                    <div className="text-sm text-gray-400">{item.subtitle}</div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
+    </section>
 
         {/* Providers Section - Enhanced with better error and loading states */}
         <section className="py-20 bg-white">
